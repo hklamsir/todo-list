@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Todo Webapp｜三款手機優先主題提案</title>
+<style>
+/* ============================================================
+   0. 比較頁外框（中性畫廊，刻意不干擾三款主題）
+   ============================================================ */
+:root{
+  --c-bg:#F4F6FA; --c-card:#FFFFFF; --c-ink:#16202E; --c-muted:#55637A;
+  --c-line:#DFE5EE; --c-accent:#3348C8; --c-accent-soft:#EDF0FF;
+  --c-radius:14px; --c-shadow:0 4px 18px rgba(22,32,46,.06);
+  --c-shadow-lg:0 12px 34px rgba(22,32,46,.10);
+  --c-fast:160ms ease;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--c-bg); color:var(--c-ink);
+  font-family:"Segoe UI","Microsoft JhengHei","PingFang HK",system-ui,-apple-system,sans-serif;
+  font-size:16px; line-height:1.65; overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--c-accent);outline-offset:2px}
+a{color:var(--c-accent)}
+.skip{position:absolute;left:-9999px;top:0;background:var(--c-ink);color:#fff;padding:12px 18px;z-index:99}
+.skip:focus{left:12px;top:12px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px}
+
+/* ---------- Topbar ---------- */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.94);border-bottom:1px solid var(--c-line);backdrop-filter:blur(10px)}
+.topbar-in{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:16px 0}
+.brand-mark{width:44px;height:44px;border-radius:12px;background:var(--c-ink);color:#fff;display:grid;place-items:center;flex:none}
+.brand-mark svg{width:24px;height:24px}
+.tt{flex:1;min-width:230px}
+.tt h1{font-size:21px;line-height:1.25;letter-spacing:-.3px;font-weight:750}
+.tt p{font-size:13.5px;color:var(--c-muted);margin-top:3px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:6px 13px;border-radius:999px;background:var(--c-accent-soft);color:var(--c-accent);font-size:13px;font-weight:650;border:1px solid #D8DEFA}
+.pill svg{width:15px;height:15px}
+.ghost-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 15px;border-radius:11px;border:1px solid var(--c-line);background:#fff;color:var(--c-ink);font-size:14px;font-weight:650;transition:background var(--c-fast),border-color var(--c-fast)}
+.ghost-btn:hover{background:#F7F9FD;border-color:#BFC9DA}
+.ghost-btn svg{width:17px;height:17px}
+
+/* ---------- Switcher ---------- */
+.switcher-bar{position:sticky;top:77px;z-index:39;background:var(--c-bg);border-bottom:1px solid var(--c-line)}
+.switcher{display:flex;gap:8px;padding:11px 0;overflow-x:auto;scrollbar-width:thin}
+.tab{display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:9px 18px;border-radius:12px;border:1px solid var(--c-line);background:#fff;color:var(--c-ink);font-size:15px;font-weight:700;white-space:nowrap;transition:background var(--c-fast),color var(--c-fast),border-color var(--c-fast)}
+.tab:hover{background:#EEF2F9}
+.tab[aria-selected="true"]{background:var(--c-ink);color:#fff;border-color:var(--c-ink)}
+.tab .dot{width:11px;height:11px;border-radius:50%;flex:none}
+.tab .num{font-size:12px;opacity:.65;font-weight:800;letter-spacing:.08em}
+
+main{padding:28px 0 64px}
+section[role="tabpanel"]{animation:fade .22s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- Common blocks ---------- */
+.card{background:var(--c-card);border:1px solid var(--c-line);border-radius:var(--c-radius);box-shadow:var(--c-shadow)}
+.sec{margin:0 0 30px}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin:0 0 14px}
+.sec-head h2{font-size:22px;font-weight:770;letter-spacing:-.3px}
+.sec-head .kicker{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--c-accent)}
+.sec-head p{width:100%;font-size:14.5px;color:var(--c-muted);margin-top:-4px}
+.callout{display:flex;gap:13px;padding:16px 18px;border-radius:12px;background:#FFF9E8;border:1px solid #F0DFA6;color:#5A4708;font-size:14.5px;line-height:1.65;margin-bottom:22px}
+.callout svg{width:20px;height:20px;flex:none;margin-top:2px}
+.callout strong{font-weight:750}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.pad{padding:20px}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--c-line);border-radius:12px;background:#fff}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px}
+th,td{padding:13px 15px;text-align:left;border-bottom:1px solid var(--c-line);vertical-align:top}
+thead th{background:#F7F9FD;font-size:13px;font-weight:800;letter-spacing:.03em;color:var(--c-ink);position:sticky;top:0}
+tbody tr:last-child td{border-bottom:0}
+tbody th{font-weight:750;background:#FBFCFE;width:150px;color:var(--c-ink)}
+td .tiny{display:block;font-size:12.5px;color:var(--c-muted);margin-top:3px}
+.ok{color:#16703C;font-weight:750}
+
+/* ---------- Style summary cards ---------- */
+.style-card{display:flex;flex-direction:column;overflow:hidden}
+.sc-top{padding:18px 18px 15px;border-bottom:1px solid var(--c-line)}
+.sc-code{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:850;letter-spacing:.12em;color:var(--c-muted)}
+.sc-code i{width:12px;height:12px;border-radius:4px;display:block}
+.sc-top h3{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-top:7px}
+.sc-top .sub{font-size:13.5px;color:var(--c-accent);font-weight:700;margin-top:2px}
+.sc-top p{font-size:14px;color:var(--c-muted);margin-top:9px;line-height:1.6}
+.swatches{display:flex;gap:0;height:44px}
+.swatches div{flex:1;display:grid;place-items:center;font-size:10.5px;font-weight:800;letter-spacing:.02em}
+.sc-body{padding:16px 18px;display:flex;flex-direction:column;gap:11px;flex:1}
+.sc-row{display:flex;gap:10px;font-size:13.5px;line-height:1.55}
+.sc-row b{flex:none;width:70px;color:var(--c-muted);font-weight:700}
+.sc-row span{color:var(--c-ink)}
+.sc-foot{padding:14px 18px 18px;display:flex;gap:10px;flex-wrap:wrap}
+.pick-btn,.view-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 16px;border-radius:11px;font-size:14px;font-weight:750;transition:transform var(--c-fast),background var(--c-fast),box-shadow var(--c-fast)}
+.pick-btn{background:var(--c-ink);color:#fff;border:1px solid var(--c-ink)}
+.pick-btn:hover{background:#2A3A52;box-shadow:var(--c-shadow)}
+.pick-btn svg{width:16px;height:16px}
+.view-btn{background:#fff;color:var(--c-ink);border:1px solid var(--c-line)}
+.view-btn:hover{background:#F4F7FC;border-color:#B9C4D6}
+.pick-btn.is-picked{background:#16703C;border-color:#16703C}
+
+/* ---------- Side-by-side mini wireframes ---------- */
+.mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.mini-card{overflow:hidden}
+.mini-card h3{font-size:16px;padding:14px 16px;border-bottom:1px solid var(--c-line);display:flex;align-items:center;gap:9px;font-weight:750}
+.mini-card h3 i{width:11px;height:11px;border-radius:4px;display:block}
+.mini-stage{position:relative;height:584px;overflow:hidden;background:linear-gradient(180deg,#FBFCFE,#F2F5FA)}
+.mini-stage .phone{position:absolute;left:50%;margin-left:-170px;transform:scale(.70);transform-origin:top center}
+.mini-foot{padding:12px 16px;border-top:1px solid var(--c-line);font-size:13px;color:var(--c-muted);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.link-btn{min-height:40px;padding:7px 12px;border-radius:9px;border:1px solid var(--c-line);background:#fff;font-size:13px;font-weight:700;color:var(--c-accent);white-space:nowrap}
+.link-btn:hover{background:var(--c-accent-soft)}
+
+/* ---------- Detail layout ---------- */
+.detail-hero{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;padding:22px;margin-bottom:22px;background:#fff;border:1px solid var(--c-line);border-radius:var(--c-radius);box-shadow:var(--c-shadow)}
+.detail-hero .dh-main{flex:1;min-width:250px}
+.detail-hero h2{font-size:26px;font-weight:820;letter-spacing:-.5px}
+.detail-hero .dh-tag{display:inline-block;font-size:13px;font-weight:750;color:var(--c-accent);margin-bottom:4px}
+.detail-hero p{font-size:15px;color:var(--c-muted);margin-top:9px;max-width:70ch}
+.dh-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.dh-badges span{font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:8px;background:#F2F5FA;border:1px solid var(--c-line);color:var(--c-muted)}
+.phones-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-bottom:22px}
+.phone-cell{background:#fff;border:1px solid var(--c-line);border-radius:var(--c-radius);box-shadow:var(--c-shadow);padding:18px 16px 20px;display:flex;flex-direction:column;align-items:center}
+.phone-cell .cap{font-size:15.5px;font-weight:760;margin-bottom:3px;text-align:center}
+.phone-cell .cap-sub{font-size:13px;color:var(--c-muted);margin-bottom:16px;text-align:center}
+.phone-stage{display:flex;justify-content:center;width:100%}
+.legend-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-bottom:22px}
+.legend-grid .pad h3{font-size:17px;font-weight:780;margin-bottom:12px}
+.legend-grid .pad h3 small{display:block;font-size:12.5px;font-weight:600;color:var(--c-muted);letter-spacing:0;margin-top:2px}
+.zone-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:10px}
+.zone-list li{display:flex;gap:11px;font-size:14px;line-height:1.55}
+.zone-list .zn{flex:none;width:26px;height:26px;border-radius:8px;background:#FFF3CC;border:1px solid #E9CE76;color:#7A5A00;display:grid;place-items:center;font-size:12px;font-weight:850}
+.zone-list b{font-weight:750}
+.zone-list span{display:block;color:var(--c-muted);font-size:13px}
+.flow{list-style:none;padding:0;counter-reset:fl;display:flex;flex-direction:column;gap:0}
+.flow li{position:relative;padding:0 0 15px 40px;counter-increment:fl;font-size:14px;line-height:1.55}
+.flow li:not(:last-child)::after{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:#DFE5EE}
+.flow li::before{content:counter(fl);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--c-accent-soft);border:1px solid #C9D1F5;color:var(--c-accent);display:grid;place-items:center;font-size:12px;font-weight:850}
+.flow li b{font-weight:750}
+.flow li em{display:block;font-style:normal;font-size:12.5px;color:var(--c-muted);font-family:ui-monospace,Consolas,monospace;margin-top:2px}
+.flow-note{margin-top:6px;padding:11px 13px;border-radius:10px;background:#F6F8FC;border:1px solid var(--c-line);font-size:13px;color:var(--c-muted)}
+
+/* token table */
+.token-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.token-tbl{min-width:0!important;font-size:14px}
+.token-tbl th,.token-tbl td{padding:10px 13px}
+.token-tbl tbody th{width:135px}
+.hex{display:inline-flex;align-items:center;gap:8px;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.hex i{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.14);display:block}
+.repl-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:9px;font-size:14px}
+.repl-list li{display:flex;gap:10px;line-height:1.55}
+.repl-list li::before{content:"⟨⟩";flex:none;font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:800;color:#A22C68;background:#FFF0F6;border:1px dashed #E9A8C8;border-radius:6px;padding:2px 6px;height:fit-content}
+.repl-list b{font-weight:750}
+
+/* ---------- Phone shell (shared, themed via data-theme) ---------- */
+.phone{
+  width:340px;height:812px;flex:none;position:relative;overflow:hidden;
+  border:9px solid #20283A;border-radius:38px;
+  background:var(--bg);color:var(--ink);
+  box-shadow:0 18px 38px rgba(22,32,46,.20),0 2px 6px rgba(22,32,46,.12);
+  display:flex;flex-direction:column;
+  font-family:var(--font-body);
+  --pad:18px;--gap:12px;--radius:14px;--bw:2px;
+}
+.p-status{height:32px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:12px;font-weight:750;color:var(--ink);opacity:.85}
+.p-status-i{display:flex;align-items:center;gap:5px}
+.p-status-i svg{width:14px;height:14px}
+.p-screen{flex:1;min-height:0;display:flex;flex-direction:column;padding:4px var(--pad) 0;overflow:hidden}
+.p-home{height:16px;flex:none;display:grid;place-items:center}
+.p-home::after{content:"";width:104px;height:4px;border-radius:99px;background:var(--ink);opacity:.35}
+.z{position:relative;flex:none;margin-bottom:var(--gap)}
+.z-label{display:block;font-family:ui-monospace,Consolas,"Segoe UI",monospace;font-size:10px;line-height:1.25;font-weight:700;letter-spacing:.01em;color:#7A5A00;background:#FFF3CC;border:1px dashed #E4C571;border-radius:5px;padding:2px 6px;margin-bottom:5px;width:fit-content;max-width:100%}
+.repl{display:inline-flex;align-items:center;font-family:ui-monospace,Consolas,monospace;font-size:9.5px;font-weight:800;color:#A22C68;background:#FFF0F6;border:1px dashed #E9A8C8;border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.tap-note{display:inline-block;font-family:ui-monospace,Consolas,monospace;font-size:9.5px;font-weight:800;color:#1B6B36;background:#E9F7ED;border:1px solid #B7DFC0;border-radius:5px;padding:1px 5px;white-space:nowrap}
+body.hide-notes .z-label,body.hide-notes .repl,body.hide-notes .tap-note{display:none!important}
+
+/* wireframe primitives — defaults, overridden per theme */
+.wf-head{padding:12px 14px;border-radius:var(--radius);background:var(--head-bg);border:var(--bw) solid var(--line);box-shadow:var(--head-shadow)}
+.wf-brand{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;flex-wrap:wrap}
+.wf-h1{font-family:var(--font-display);font-size:var(--h1);font-weight:var(--h1w);line-height:1.08;letter-spacing:var(--h1ls);margin:5px 0 2px;color:var(--ink)}
+.wf-sub{font-size:13.5px;line-height:1.4;color:var(--muted)}
+.wf-bar{position:relative;height:var(--barh);margin-top:10px;border-radius:var(--radius);background:var(--track);overflow:hidden;border:var(--barb,0) solid var(--line)}
+.wf-bar-fill{display:block;height:100%;width:25%;background:var(--barfill);border-radius:inherit}
+.wf-bar-txt{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--bartxt);letter-spacing:.03em}
+.wf-tabs{display:flex;gap:8px}
+.wf-tab{flex:1;min-height:44px;padding:8px 4px;border-radius:var(--radius);font-size:14.5px;font-weight:750;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);transition:background var(--c-fast),color var(--c-fast)}
+.wf-tab.active{background:var(--tabon);color:var(--tabonink);border-color:var(--tabonborder)}
+.wf-filters{display:flex;gap:8px}
+.wf-sel{flex:1;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:5px;padding:8px 11px;border-radius:var(--radius);border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font-size:13px;font-weight:700}
+.wf-sel svg{width:15px;height:15px;flex:none;opacity:.7}
+.z-list{flex:1;min-height:0;display:flex;flex-direction:column}
+.wf-list{flex:1;min-height:0;display:flex;flex-direction:column;gap:var(--gap);overflow:hidden}
+.wf-item{display:flex;align-items:center;gap:10px;min-height:62px;padding:9px 11px;border-radius:var(--radius);background:var(--card);border:var(--bw) solid var(--line);box-shadow:var(--item-shadow)}
+.wf-item.is-done{opacity:.62}
+.wf-check{flex:none;width:30px;height:30px;min-width:44px;min-height:44px;padding:0;border:2px solid var(--line);border-radius:var(--checkr);background:transparent;color:#fff;display:grid;place-items:center;position:relative}
+.wf-check svg{width:17px;height:17px}
+.wf-check.on{background:var(--checkon);border-color:var(--checkon)}
+.wf-item-main{flex:1;min-width:0}
+.wf-item-title{font-size:16.5px;font-weight:750;line-height:1.3;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.is-done .wf-item-title{text-decoration:line-through}
+.wf-item-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px}
+.wf-due{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--muted)}
+.wf-due svg{width:12px;height:12px}
+.wf-due.hot{color:var(--hot)}
+.wf-chip{font-size:11px;font-weight:750;padding:2px 8px;border-radius:var(--chipr);background:var(--chipbg);color:var(--chipink);border:var(--chipb,0) solid var(--line);white-space:nowrap}
+.wf-item-actions{display:flex;gap:2px;flex:none}
+.wf-ico{width:36px;height:44px;min-width:36px;padding:0;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;border-radius:8px}
+.wf-ico svg{width:16px;height:16px}
+.wf-note{font-size:11px;color:var(--muted);padding:5px 2px 0;display:flex;align-items:center;flex-wrap:wrap;line-height:1.4}
+.wf-cta{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding-bottom:6px}
+.wf-primary{min-height:54px;display:flex;align-items:center;justify-content:center;gap:9px;border-radius:var(--radius);border:var(--ctab) solid var(--line);background:var(--cta);color:var(--ctaInk);font-size:17px;font-weight:800;box-shadow:var(--cta-shadow);letter-spacing:.01em}
+.wf-primary svg{width:20px;height:20px}
+.wf-cta .tap-note{align-self:flex-end}
+
+/* form screen */
+.f-head{display:flex;align-items:center;gap:10px;padding:4px 0 2px}
+.f-back{width:44px;height:44px;flex:none;border-radius:var(--radius);border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center}
+.f-back svg{width:19px;height:19px}
+.f-title{font-family:var(--font-display);font-size:var(--h1);font-weight:var(--h1w);line-height:1.1;letter-spacing:var(--h1ls);color:var(--ink)}
+.f-kicker{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.f-field{display:flex;flex-direction:column;gap:6px}
+.f-label{font-size:15px;font-weight:780;color:var(--ink);display:flex;align-items:center;gap:7px}
+.f-label .req{font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:5px;background:var(--chipbg);color:var(--chipink)}
+.f-input{min-height:52px;padding:12px 13px;border-radius:var(--radius);border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:17px;font-weight:650;box-shadow:var(--item-shadow);width:100%}
+.f-hint{font-size:12px;color:var(--muted);line-height:1.4}
+.f-date-row{display:flex;gap:9px;align-items:center}
+.f-date-row .f-input{flex:1}
+.f-today{min-height:48px;padding:8px 11px;border-radius:var(--radius);border:var(--bw) solid var(--line);background:var(--chipbg);color:var(--chipink);font-size:12.5px;font-weight:800;white-space:nowrap}
+.f-chips{display:flex;flex-wrap:wrap;gap:8px}
+.f-chip{min-height:44px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--chipr);border:var(--bw) solid var(--line);background:var(--card);color:var(--ink);font-size:14.5px;font-weight:750}
+.f-chip.on{background:var(--tabon);color:var(--tabonink);border-color:var(--tabonborder)}
+.f-chip svg{width:14px;height:14px}
+.f-actions{display:flex;flex-direction:column;gap:8px}
+.f-save{min-height:56px;border-radius:var(--radius);border:var(--ctab) solid var(--line);background:var(--cta);color:var(--ctaInk);font-size:17px;font-weight:820;box-shadow:var(--cta-shadow);display:flex;align-items:center;justify-content:center;gap:8px}
+.f-save svg{width:18px;height:18px}
+.f-row{display:flex;gap:8px}
+.f-del,.f-cancel{flex:1;min-height:48px;border-radius:var(--radius);font-size:14.5px;font-weight:750;border:var(--bw) solid var(--line);background:var(--card);color:var(--ink)}
+.f-del{color:var(--danger);border-color:var(--danger)}
+.f-feedback{display:flex;gap:9px;align-items:flex-start;padding:11px 12px;border-radius:var(--radius);border:1px dashed var(--line);background:var(--head-bg);font-size:12px;line-height:1.45;color:var(--muted)}
+.f-feedback svg{width:16px;height:16px;flex:none;margin-top:1px;color:var(--hot)}
+.f-feedback code{font-family:ui-monospace,Consolas,monospace;font-size:11px}
+
+/* ============================================================
+   1. THEME A — Candy Pop / Claymorphism
+   高密度撞色、3px 粗描邊、硬陰影、14px 圓角
+   ============================================================ */
+.phone[data-theme="a"]{
+  --bg:#FFF9EC; --ink:#1E1B4B; --muted:#55508A; --card:#FFFFFF; --line:#1E1B4B;
+  --head-bg:#FFD84D; --head-shadow:5px 5px 0 #1E1B4B;
+  --track:#FFFFFF; --barfill:#4F46E5; --bartxt:#1E1B4B; --barh:22px; --barb:2px;
+  --tabon:#4F46E5; --tabonink:#FFFFFF; --tabonborder:#1E1B4B;
+  --checkr:50%; --checkon:#4F46E5; --chipr:7px; --chipbg:#EEF2FF; --chipink:#3730A3;
+  --cta:#4F46E5; --ctaInk:#FFFFFF; --ctab:3px; --cta-shadow:4px 4px 0 #FFD84D;
+  --item-shadow:3px 3px 0 #1E1B4B; --hot:#C2410C; --danger:#B91C1C;
+  --radius:14px; --bw:3px; --gap:10px; --pad:16px;
+  --font-display:"Arial Black","Segoe UI Black","Microsoft JhengHei",system-ui,sans-serif;
+  --font-body:"Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+  --h1:33px; --h1w:900; --h1ls:-1.2px;
+}
+.phone[data-theme="a"] .wf-h1{text-transform:none}
+.phone[data-theme="a"] .wf-brand{text-transform:none;letter-spacing:.02em}
+.phone[data-theme="a"] .wf-tab.active{box-shadow:2px 2px 0 #1E1B4B}
+.phone[data-theme="a"] .wf-chip{text-transform:none}
+.phone[data-theme="a"] .f-input{border-width:3px}
+.phone[data-theme="a"] .f-kicker{display:none}
+.phone[data-theme="a"] .wf-item{gap:8px}
+
+/* ============================================================
+   2. THEME B — Jelly Flow / Soft UI Evolution
+   通透漸層、零描邊、26px 大圓角、大留白
+   ============================================================ */
+.phone[data-theme="b"]{
+  --bg:#F4F8FF; --ink:#1E293B; --muted:#5A6B8C; --card:#FFFFFF; --line:#E6EBF7;
+  --head-bg:linear-gradient(135deg,#F0E6FF 0%,#E3F0FF 52%,#FFE9EF 100%);
+  --head-shadow:0 12px 26px rgba(84,110,190,.14);
+  --track:#E8EDF9; --barfill:linear-gradient(90deg,#5B4BE0,#2563EB); --bartxt:#1E293B; --barh:16px;
+  --tabon:linear-gradient(120deg,#5B4BE0,#2563EB); --tabonink:#FFFFFF; --tabonborder:transparent;
+  --checkr:50%; --checkon:#5B4BE0; --chipr:999px; --chipbg:#EEF1FF; --chipink:#3D4DBE;
+  --cta:linear-gradient(120deg,#5B4BE0,#2563EB 58%,#1D4ED8); --ctaInk:#FFFFFF; --ctab:0px;
+  --cta-shadow:0 12px 24px rgba(59,88,220,.30);
+  --item-shadow:0 8px 20px rgba(84,110,190,.10); --hot:#1D4ED8; --danger:#B42318;
+  --radius:24px; --bw:0px; --gap:14px; --pad:19px;
+  --font-display:ui-rounded,"SF Pro Rounded","Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+  --font-body:ui-rounded,"SF Pro Rounded","Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+  --h1:29px; --h1w:780; --h1ls:-.6px;
+}
+.phone[data-theme="b"] .wf-head{padding:15px 16px;border-radius:28px}
+.phone[data-theme="b"] .wf-bar{border-radius:99px}
+.phone[data-theme="b"] .wf-tabs{gap:5px;padding:5px;background:#E9EEFB;border-radius:999px}
+.phone[data-theme="b"] .wf-tab{border-radius:999px;font-size:14px}
+.phone[data-theme="b"] .wf-sel{border-radius:16px;font-size:12.5px}
+.phone[data-theme="b"] .wf-item{border-radius:24px;padding:11px 13px;min-height:66px}
+.phone[data-theme="b"] .wf-primary,.phone[data-theme="b"] .f-save{border-radius:999px}
+.phone[data-theme="b"] .f-chip{border-radius:999px}
+.phone[data-theme="b"] .f-input{border-radius:18px}
+.phone[data-theme="b"] .f-back,.phone[data-theme="b"] .f-today,.phone[data-theme="b"] .f-del,.phone[data-theme="b"] .f-cancel,.phone[data-theme="b"] .f-feedback{border-radius:16px}
+
+/* ============================================================
+   3. THEME C — Bright Editorial / Swiss Modernism 2.0
+   直角、1px 細線、襯線刊頭、序號、線性單欄
+   ============================================================ */
+.phone[data-theme="c"]{
+  --bg:#FAF8F2; --ink:#111111; --muted:#5B5B52; --card:transparent; --line:#111111;
+  --head-bg:transparent; --head-shadow:none;
+  --track:#E6E3D8; --barfill:#111111; --bartxt:#111111; --barh:8px;
+  --tabon:#111111; --tabonink:#FFFFFF; --tabonborder:#111111;
+  --checkr:50%; --checkon:#111111; --chipr:0px; --chipbg:#FFFFFF; --chipink:#111111; --chipb:1px;
+  --cta:#111111; --ctaInk:#FFFFFF; --ctab:1px; --cta-shadow:none;
+  --item-shadow:none; --hot:#A3341C; --danger:#A3341C;
+  --radius:0px; --bw:1px; --gap:0px; --pad:20px;
+  --font-display:Georgia,"Times New Roman","Microsoft JhengHei",serif;
+  --font-body:"Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+  --h1:37px; --h1w:700; --h1ls:-.8px;
+}
+.phone[data-theme="c"] .wf-head{padding:0 0 12px;border:0;border-bottom:2px solid #111;border-radius:0}
+.phone[data-theme="c"] .wf-brand{letter-spacing:.18em;font-family:ui-monospace,Consolas,monospace;color:#111;font-size:10.5px}
+.phone[data-theme="c"] .wf-h1{font-style:italic}
+.phone[data-theme="c"] .wf-sub{font-size:12.5px;letter-spacing:.02em}
+.phone[data-theme="c"] .wf-bar{margin-top:9px;border-radius:0}
+.phone[data-theme="c"] .wf-bar-txt{display:none}
+.phone[data-theme="c"] .z-tabs{margin-top:12px}
+.phone[data-theme="c"] .wf-tabs{gap:0;border-bottom:1px solid #111}
+.phone[data-theme="c"] .wf-tab{border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;font-size:14.5px;min-height:46px}
+.phone[data-theme="c"] .wf-tab.active{background:transparent;color:#111;border-bottom-color:#D8FF3E;font-weight:850}
+.phone[data-theme="c"] .z-filters{margin-top:10px}
+.phone[data-theme="c"] .wf-filters{gap:10px}
+.phone[data-theme="c"] .wf-sel{border:0;border-bottom:1px solid #111;border-radius:0;background:transparent;padding-left:0;font-size:12.5px;min-height:42px}
+.phone[data-theme="c"] .z-list{margin-top:8px}
+.phone[data-theme="c"] .wf-list{gap:0}
+.phone[data-theme="c"] .wf-item{border:0;border-bottom:1px solid #D9D5C8;border-radius:0;padding:9px 2px;min-height:62px;gap:11px;position:relative}
+.phone[data-theme="c"] .wf-item::before{content:attr(data-n);font-family:Georgia,serif;font-size:13px;font-weight:700;color:#9A9789;width:22px;flex:none;text-align:right}
+.phone[data-theme="c"] .wf-check{min-width:30px;width:26px;height:26px;border-width:1px;border-radius:50%}
+.phone[data-theme="c"] .wf-item-title{font-size:16px;font-weight:650}
+.phone[data-theme="c"] .wf-chip{border-radius:0;background:transparent;padding:1px 6px;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase}
+.phone[data-theme="c"] .wf-item.is-done .wf-item-title{color:#7A786D}
+.phone[data-theme="c"] .wf-note{border-top:1px solid #D9D5C8;margin-top:4px;padding-top:7px;font-size:10.5px;letter-spacing:.02em}
+.phone[data-theme="c"] .wf-primary{border-radius:0;background:#111;justify-content:flex-start;padding:0 0 0 16px;position:relative;font-size:16px;letter-spacing:.04em}
+.phone[data-theme="c"] .wf-primary::after{content:"→";position:absolute;right:0;top:0;bottom:0;width:54px;display:grid;place-items:center;background:#D8FF3E;color:#111;font-size:24px;font-weight:700}
+.phone[data-theme="c"] .f-input{border:0;border-bottom:2px solid #111;border-radius:0;background:transparent;padding-left:2px;font-size:18px}
+.phone[data-theme="c"] .f-back{border-radius:0}
+.phone[data-theme="c"] .f-kicker{font-family:ui-monospace,Consolas,monospace;letter-spacing:.16em}
+.phone[data-theme="c"] .f-head{border-bottom:1px solid #111;padding-bottom:12px;margin-bottom:6px}
+.phone[data-theme="c"] .f-chip{border-radius:0;font-size:13.5px}
+.phone[data-theme="c"] .f-chip.on{background:#D8FF3E;color:#111;border-color:#111}
+.phone[data-theme="c"] .f-save{border-radius:0;background:#111;justify-content:flex-start;padding-left:16px;letter-spacing:.04em;position:relative}
+.phone[data-theme="c"] .f-save::after{content:"→";position:absolute;right:0;top:0;bottom:0;width:54px;display:grid;place-items:center;background:#D8FF3E;color:#111;font-size:24px}
+.phone[data-theme="c"] .f-del,.phone[data-theme="c"] .f-cancel,.phone[data-theme="c"] .f-today,.phone[data-theme="c"] .f-feedback{border-radius:0}
+.phone[data-theme="c"] .f-today{background:#D8FF3E;color:#111;border-color:#111}
+.phone[data-theme="c"] .f-feedback{border-style:solid}
+
+/* ---------- 首頁：緊湊節奏，確保 4 條待辦（含已完成置底）完整可見 ---------- */
+.phone .p-screen--home .z{margin-bottom:7px}
+.phone .p-screen--home .z-label{margin-bottom:3px}
+.phone .p-screen--home .wf-head{padding:10px 13px}
+.phone .p-screen--home .wf-bar{margin-top:7px}
+.phone .p-screen--home .wf-list{gap:8px}
+.phone .p-screen--home .wf-item{min-height:56px;padding:7px 10px}
+.phone .p-screen--home .wf-item-title{font-size:16px}
+.phone .p-screen--home .wf-item-meta{margin-top:3px}
+.phone .p-screen--home .wf-ico{height:44px}
+.phone .p-screen--home .wf-note{padding-top:4px;font-size:10.5px}
+.phone .p-screen--home .wf-cta{padding-bottom:4px}
+.phone[data-theme="c"] .p-screen--home .wf-list{gap:0}
+.phone[data-theme="c"] .p-screen--home .wf-head{padding:0 0 10px}
+
+/* ---------- 主要操作頁：垂直節奏壓縮，確保 ①–⑥ 全部完整可見 ----------
+   放喺所有 theme rules 之後，令三款主題都套用同一套緊湊尺寸，
+   但保留各自嘅色彩／圓角／字族差異。觸控目標仍然 ≥44px。 */
+.phone .p-screen--form .z{margin-bottom:8px}
+.phone .p-screen--form .z:last-child{margin-bottom:0}
+.phone .p-screen--form .z-label{margin-bottom:4px}
+.phone .p-screen--form .f-head{padding:2px 0 2px}
+.phone .p-screen--form .f-title{font-size:27px;line-height:1.1;white-space:nowrap}
+.phone .p-screen--form .f-field{gap:5px}
+.phone .p-screen--form .f-label{font-size:14.5px}
+.phone .p-screen--form .f-input{min-height:48px;padding:9px 12px}
+.phone .p-screen--form .f-hint{font-size:11.5px;line-height:1.35}
+.phone .p-screen--form .f-today{min-height:44px;padding:6px 10px;font-size:12px}
+.phone .p-screen--form .f-chips{gap:7px}
+.phone .p-screen--form .f-chip{min-height:44px;padding:6px 12px}
+.phone .p-screen--form .f-actions{gap:7px}
+.phone .p-screen--form .f-save{min-height:52px}
+.phone .p-screen--form .f-del,.phone .p-screen--form .f-cancel{min-height:46px}
+.phone .p-screen--form .f-feedback{padding:8px 10px;font-size:11px;line-height:1.35;gap:7px}
+.phone[data-theme="c"] .p-screen--form .f-title{font-size:28px;font-style:normal}
+.phone[data-theme="c"] .p-screen--form .f-head{padding-bottom:8px;margin-bottom:2px}
+.phone[data-theme="c"] .p-screen--form .z{margin-bottom:5px}
+.phone[data-theme="c"] .p-screen--form .f-feedback{border-style:dashed}
+
+/* ============================================================
+   4. 融合變體 D / E
+   色彩 = Bright Editorial（米白／黑白／檸檬黃綠／珊瑚、強對比與色彩層級）
+   排版 = Jelly Flow（大圓角、分組卡、疏朗欄位節奏、圓體視覺階層）
+   兩者共用 tokens、共用頁面結構，只喺「版面配置」上拉開差異。
+   ============================================================ */
+.phone[data-theme="d"],.phone[data-theme="e"]{
+  --bg:#FAF8F2; --ink:#111111; --muted:#5B5B52; --card:#FFFFFF; --line:#C9C5B8;
+  --head-bg:#FFFFFF; --head-shadow:0 10px 24px rgba(17,17,17,.07);
+  --track:#E6E3D8; --barfill:#111111; --bartxt:#111111; --barh:14px;
+  --tabon:#111111; --tabonink:#FFFFFF; --tabonborder:transparent;
+  --checkr:50%; --checkon:#D8FF3E; --chipr:999px; --chipbg:#F1EEE4; --chipink:#111111; --chipb:0px;
+  --cta:#111111; --ctaInk:#FFFFFF; --ctab:0px; --cta-shadow:0 10px 22px rgba(17,17,17,.16);
+  --item-shadow:0 8px 20px rgba(17,17,17,.06); --hot:#C2410C; --danger:#A3341C;
+  --radius:26px; --bw:0px; --gap:9px; --pad:19px;
+  --font-display:ui-rounded,"SF Pro Rounded","Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+  --font-body:ui-rounded,"SF Pro Rounded","Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+  --h1:30px; --h1w:780; --h1ls:-.6px;
+}
+/* D/E 共用元件：Jelly 嘅圓角同分組，Editorial 嘅黑白對比 */
+.phone[data-theme="d"] .wf-item,.phone[data-theme="e"] .wf-item{border-radius:22px;padding:8px 11px;min-height:58px;gap:10px;border:1px solid #E6E3D8}
+.phone[data-theme="d"] .wf-item-title,.phone[data-theme="e"] .wf-item-title{font-size:16px}
+.phone[data-theme="d"] .wf-chip,.phone[data-theme="e"] .wf-chip{font-size:11px;border-radius:999px}
+.phone[data-theme="d"] .wf-tabs,.phone[data-theme="e"] .wf-tabs{gap:5px;padding:5px;background:#EFECE2;border-radius:999px}
+.phone[data-theme="d"] .wf-tab,.phone[data-theme="e"] .wf-tab{border:0;border-radius:999px;font-size:14px}
+.phone[data-theme="d"] .wf-tab.active,.phone[data-theme="e"] .wf-tab.active{background:#111;color:#fff}
+.phone[data-theme="d"] .wf-sel,.phone[data-theme="e"] .wf-sel{border:1px solid #E6E3D8;border-radius:16px;background:#fff;font-size:12.5px}
+.phone[data-theme="d"] .wf-note,.phone[data-theme="e"] .wf-note{font-size:10.5px}
+.phone[data-theme="d"] .f-title,.phone[data-theme="e"] .f-title{font-size:27px;white-space:nowrap;line-height:1.12}
+.phone[data-theme="d"] .f-kicker,.phone[data-theme="e"] .f-kicker{font-family:ui-monospace,Consolas,monospace;letter-spacing:.14em;font-size:10px}
+.phone[data-theme="d"] .f-input,.phone[data-theme="e"] .f-input{border:1px solid #E6E3D8;border-radius:16px;background:#fff;min-height:48px;padding:10px 12px}
+.phone[data-theme="d"] .f-chip,.phone[data-theme="e"] .f-chip{border-radius:999px;border:1px solid #E6E3D8;min-height:44px;padding:6px 12px}
+.phone[data-theme="d"] .f-chip.on,.phone[data-theme="e"] .f-chip.on{background:#D8FF3E;border-color:#D8FF3E;color:#111}
+.phone[data-theme="d"] .f-back,.phone[data-theme="e"] .f-back{border-radius:16px;border:1px solid #E6E3D8}
+.phone[data-theme="d"] .f-today,.phone[data-theme="e"] .f-today{border-radius:16px;background:#F1EEE4;color:#111}
+.phone[data-theme="d"] .f-save,.phone[data-theme="e"] .f-save{border-radius:999px;background:#111;min-height:52px}
+.phone[data-theme="d"] .f-del,.phone[data-theme="e"] .f-del,
+.phone[data-theme="d"] .f-cancel,.phone[data-theme="e"] .f-cancel{border-radius:16px;border:1px solid #E6E3D8;min-height:46px}
+.phone[data-theme="d"] .f-feedback,.phone[data-theme="e"] .f-feedback{border:1px dashed #C9C5B8;background:#F4F1E8;border-radius:16px;padding:9px 11px;font-size:11px}
+.phone[data-theme="d"] .p-screen--fusion .z-label,.phone[data-theme="e"] .p-screen--fusion .z-label{margin-bottom:4px}
+
+/* ---- 變體 D：對稱單欄、線性進度條、底部全寬膠囊 CTA ---- */
+.phone[data-theme="d"] .wf-head{background:linear-gradient(180deg,#D8FF3E 0 9px,#FFFFFF 9px);padding:16px 16px 13px;border-radius:28px;border:0;box-shadow:var(--head-shadow)}
+.phone[data-theme="d"] .wf-brand{font-family:ui-monospace,Consolas,monospace;letter-spacing:.16em;font-size:10.5px;color:#111}
+.phone[data-theme="d"] .wf-bar{border-radius:99px;height:16px}
+.phone[data-theme="d"] .wf-bar-txt{font-size:10.5px}
+.phone[data-theme="d"] .wf-primary{border-radius:999px;background:#111;justify-content:flex-start;padding-left:20px;position:relative;min-height:54px}
+.phone[data-theme="d"] .wf-primary::after{content:"→";position:absolute;right:6px;top:6px;bottom:6px;width:42px;border-radius:50%;background:#D8FF3E;color:#111;display:grid;place-items:center;font-size:20px;font-weight:800}
+.f-panel{background:#fff;border:1px solid #E6E3D8;border-radius:26px;padding:13px;box-shadow:var(--item-shadow);margin-bottom:9px}
+.f-panel .f-field + .f-field{margin-top:11px;padding-top:11px;border-top:1px solid #EFECE2}
+.f-panel .z:last-child,.fx-card .z:last-child{margin-bottom:0}
+
+/* ---- 變體 E：不對稱雙欄、圓形進度環、時段分組卡、右下圓形 FAB ---- */
+.fx-head{display:grid;grid-template-columns:1.65fr .85fr;gap:12px;align-items:center;background:#fff;border-radius:26px;padding:14px 15px;box-shadow:var(--head-shadow)}
+.fx-kicker{font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.16em;color:var(--muted)}
+.fx-h1{font-family:var(--font-display);font-size:27px;font-weight:800;line-height:1.1;letter-spacing:-.6px;margin-top:3px}
+.fx-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.fx-ring{width:74px;height:74px;border-radius:50%;background:conic-gradient(#D8FF3E 0 25%,#E6E3D8 25% 100%);display:grid;place-items:center;position:relative;justify-self:end}
+.fx-ring::before{content:"";position:absolute;inset:9px;border-radius:50%;background:#fff}
+.fx-ring span{position:relative;font-size:15px;font-weight:850;color:#111}
+.fx-band{height:6px;border-radius:99px;background:linear-gradient(90deg,#FF5A3C 0 30%,#D8FF3E 30% 100%);margin-top:10px}
+.fx-seg{display:flex;gap:4px;padding:4px;background:#111;border-radius:999px}
+.fx-seg button{flex:1;min-height:44px;border:0;border-radius:999px;background:transparent;color:#fff;font-size:13.5px;font-weight:700}
+.fx-seg button.on{background:#D8FF3E;color:#111;font-weight:850}
+.fx-cats{display:flex;gap:7px;margin-top:9px;overflow:hidden}
+.fx-cats span{white-space:nowrap;font-size:12px;font-weight:750;padding:8px 12px;min-height:44px;display:inline-flex;align-items:center;border-radius:999px;background:#fff;border:1px solid #E6E3D8;color:var(--muted)}
+.fx-cats span.on{background:#111;color:#fff;border-color:#111}
+.fx-filters{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6E3D8;border-radius:18px;padding:8px 12px}
+.fx-filters button{flex:1;background:transparent;border:0;color:#111;font-size:12.5px;font-weight:700;text-align:left;padding:4px 0;min-height:36px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.fx-filters button svg{width:14px;height:14px;flex:none;opacity:.65}
+.fx-filters i{width:1px;height:20px;background:#E6E3D8;display:block}
+.fx-group{background:#fff;border:1px solid #E6E3D8;border-radius:24px;padding:9px 11px;box-shadow:var(--item-shadow);margin-bottom:9px}
+.fx-group:last-of-type{margin-bottom:0}
+.fx-group-h{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:850;letter-spacing:.06em;color:var(--muted);padding:2px 2px 7px}
+.fx-group-h i{width:9px;height:9px;border-radius:50%;background:#D8FF3E;display:block;border:1px solid #111}
+.fx-group.done .fx-group-h i{background:#E6E3D8;border-color:#C9C5B8}
+.fx-group-h span{margin-left:auto;font-family:ui-monospace,Consolas,monospace}
+.fx-group .wf-item{border:0;box-shadow:none;border-radius:0;padding:5px 0;min-height:52px}
+.fx-group .wf-item + .wf-item{border-top:1px solid #EFECE2}
+.fx-fab-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.fx-fab{width:60px;height:60px;border-radius:50%;background:#111;color:#D8FF3E;border:0;display:grid;place-items:center;box-shadow:0 10px 22px rgba(17,17,17,.22)}
+.fx-fab svg{width:26px;height:26px}
+.fx-card{background:#fff;border:1px solid #E6E3D8;border-radius:24px;padding:13px;box-shadow:var(--item-shadow);margin-bottom:9px}
+.fx-card h4{font-size:11.5px;font-weight:850;letter-spacing:.06em;color:var(--muted);margin-bottom:9px}
+.fx-card .f-field + .f-field{margin-top:11px}
+.fx-bar{display:flex;align-items:center;gap:10px;background:#111;border-radius:999px;padding:7px 7px 7px 18px}
+.fx-bar span{flex:1;color:#fff;font-size:15px;font-weight:780}
+.fx-bar button{width:46px;height:46px;border-radius:50%;border:0;background:#D8FF3E;color:#111;display:grid;place-items:center}
+.fx-bar button svg{width:20px;height:20px}
+
+/* ---- 全域硬要求：所有 wireframe 嘅 checkbox 一律正圓 ----
+   28px 視覺圓圈放喺 44×44 觸控區入面；用高權重選擇器壓過各 theme 覆寫。 */
+.phone[data-theme] .p-screen .wf-check{
+  width:44px;height:44px;min-width:44px;min-height:44px;
+  border:0;background:transparent;border-radius:50%;color:#fff;
+}
+.phone[data-theme] .p-screen .wf-check::after{
+  content:"";position:absolute;width:28px;height:28px;box-sizing:border-box;
+  border:2px solid var(--line);border-radius:50%;background:transparent;
+}
+.phone[data-theme] .p-screen .wf-check.on::after{background:var(--checkon);border-color:var(--checkon)}
+.phone[data-theme] .p-screen .wf-check svg{position:relative;z-index:1;width:16px;height:16px}
+.phone[data-theme="a"] .p-screen .wf-check::after{border-width:3px}
+.phone[data-theme="b"] .p-screen .wf-check::after{border-color:#B9C9EA}
+.phone[data-theme="c"] .p-screen .wf-check::after{border-width:1px}
+.phone[data-theme="d"] .p-screen .wf-check.on,
+.phone[data-theme="e"] .p-screen .wf-check.on{color:#111}
+
+/* ---- 融合變體分區嘅說明元件 ---- */
+.fx-tag{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;background:#111;color:#fff}
+.fx-tag.lime{background:#D8FF3E;color:#111}
+.fx-diff{list-style:none;padding:0;display:flex;flex-direction:column;gap:10px}
+.fx-diff li{display:flex;gap:10px;font-size:14px;line-height:1.55}
+.fx-diff li::before{content:"▸";color:#111;font-weight:900;flex:none}
+.fx-scenario{padding:14px 16px;border-radius:12px;background:#F4F1E8;border:1px solid #E1DCC8;font-size:14px;line-height:1.6}
+.fx-scenario b{color:#111}
+
+/* ---- 融合變體版面微調：E 首頁分組卡、兩款表單頁嘅緊湊節奏 ----
+   目的係喺 812px 手機框內完整顯示所有區塊，唔改內容層級同功能範圍。 */
+.phone[data-theme="e"] .p-screen--fusion .z{margin-bottom:5px}
+.phone[data-theme="e"] .p-screen--fusion .z-list{flex:none;display:block}
+.phone[data-theme="e"] .p-screen--fusion .z-cta{margin-top:auto}
+.phone[data-theme="d"] .p-screen--fusion .z-list{flex:none;display:block}
+.phone[data-theme="d"] .p-screen--fusion .z-cta{margin-top:auto}
+.phone[data-theme="d"] .p-screen--fusion .z{margin-bottom:7px}
+.phone[data-theme="d"] .p-screen--fusion .z-label{font-size:9.5px;padding:1px 5px;margin-bottom:2px}
+.phone[data-theme="d"] .p-screen--fusion .wf-head{padding:12px 14px 10px}
+.phone[data-theme="d"] .p-screen--fusion .wf-h1{font-size:27px}
+.phone[data-theme="d"] .p-screen--fusion .wf-bar{margin-top:5px}
+.phone[data-theme="d"] .p-screen--fusion .wf-tabs{padding:3px}
+.phone[data-theme="d"] .p-screen--fusion .wf-list{gap:7px}
+.phone[data-theme="d"] .p-screen--fusion .wf-item{padding:5px 10px;min-height:52px}
+.phone[data-theme="d"] .p-screen--fusion .wf-item-title{font-size:15.5px}
+.phone[data-theme="d"] .p-screen--fusion .wf-item-meta{margin-top:2px;flex-wrap:wrap;overflow:visible;gap:4px}
+.phone[data-theme="d"] .p-screen--fusion .wf-due{font-size:10.5px;white-space:nowrap;flex:none}
+.phone[data-theme="d"] .p-screen--fusion .wf-chip{padding:1px 6px;font-size:10px;flex:none}
+.phone[data-theme="d"] .p-screen--fusion .wf-note{padding-top:2px;font-size:10px}
+.phone[data-theme] .p-screen--fusion .wf-list{flex:none;min-height:0;overflow:visible}
+.phone[data-theme="e"] .p-screen--fusion .z-label{font-size:9.5px;padding:1px 5px;margin-bottom:2px}
+.phone[data-theme="e"] .fx-head{padding:9px 12px}
+.phone[data-theme="e"] .fx-ring{width:56px;height:56px}
+.phone[data-theme="e"] .fx-ring::before{inset:7px}
+.phone[data-theme="e"] .fx-h1{font-size:24px}
+.phone[data-theme="e"] .fx-band{height:3px;margin-top:3px}
+.phone[data-theme="e"] .fx-seg{padding:3px}
+.phone[data-theme="e"] .fx-cats{margin-top:3px}
+.phone[data-theme="e"] .fx-filters{padding:3px 12px}
+.phone[data-theme="e"] .fx-filters button{min-height:38px}
+.phone[data-theme="e"] .fx-group{padding:3px 9px;margin-bottom:3px}
+.phone[data-theme="e"] .fx-group-h{padding-bottom:0;font-size:10px}
+.phone[data-theme="e"] .fx-fab-wrap{flex-direction:row;align-items:center;justify-content:flex-end;gap:8px}
+.phone[data-theme="e"] .fx-fab{width:56px;height:56px}
+.phone[data-theme="e"] .fx-group .wf-item{min-height:44px;padding:1px 0}
+.phone[data-theme="d"] .p-screen--fform .z,
+.phone[data-theme="e"] .p-screen--fform .z{margin-bottom:3px}
+.phone[data-theme="d"] .p-screen--fform .z-label,
+.phone[data-theme="e"] .p-screen--fform .z-label{font-size:9.5px;padding:1px 5px;margin-bottom:1px}
+.phone[data-theme="d"] .p-screen--fform .f-panel,
+.phone[data-theme="e"] .p-screen--fform .fx-card{padding:10px}
+.phone[data-theme="d"] .p-screen--fform .f-head,
+.phone[data-theme="e"] .p-screen--fform .f-head{padding:0}
+.phone[data-theme="d"] .p-screen--fform .f-field,
+.phone[data-theme="e"] .p-screen--fform .f-field{gap:3px}
+.phone[data-theme="d"] .p-screen--fform .f-hint,
+.phone[data-theme="e"] .p-screen--fform .f-hint{font-size:10.5px;line-height:1.3}
+.phone[data-theme="d"] .p-screen--fform .f-input,
+.phone[data-theme="e"] .p-screen--fform .f-input{min-height:46px;padding:8px 11px}
+.phone[data-theme="d"] .p-screen--fform .f-chips,
+.phone[data-theme="e"] .p-screen--fform .f-chips{gap:6px}
+.phone[data-theme="d"] .p-screen--fform .f-chip,
+.phone[data-theme="e"] .p-screen--fform .f-chip{padding:6px 10px;font-size:13px}
+.phone[data-theme="e"] .p-screen--fform .fx-card h4{font-size:10.5px;margin-bottom:5px}
+.phone[data-theme="e"] .p-screen--fform .fx-card{margin-bottom:6px}
+.phone[data-theme="e"] .p-screen--fform .fx-bar{padding:5px 5px 5px 16px}
+.phone[data-theme="e"] .p-screen--fform .fx-bar button{width:44px;height:44px}
+.phone[data-theme="d"] .p-screen--fform .f-label,
+.phone[data-theme="e"] .p-screen--fform .f-label{font-size:14px}
+.phone[data-theme="d"] .p-screen--fform .f-feedback,
+.phone[data-theme="e"] .p-screen--fform .f-feedback{padding:7px 9px;font-size:10.5px;line-height:1.3}
+.phone[data-theme="d"] .p-screen--fform .f-actions{gap:6px}
+.phone[data-theme="d"] .p-screen--fform .fx-card .z + .z,
+.phone[data-theme="e"] .p-screen--fform .fx-card .z + .z,
+.phone[data-theme="d"] .p-screen--fform .f-panel .z + .z{margin-top:0}
+
+/* ============================================================
+   5. 變體 F — Split Hybrid（選定合併版）
+   上半部 = 圖 1（E 頁首 ＋ 黑色分段導覽）
+   下半部 = 圖 2（D 排序／分類 ＋ 線性清單 ＋ 全寬膠囊 CTA）
+   所有「矩形元件」圓角半徑相對 D/E 減 50%；
+   膠囊元件以等效半徑（元件高度／2）計再減半；
+   圓形元件（checkbox／進度環／黃綠箭嘴）保持 50% 正圓。
+   ============================================================ */
+.phone[data-theme="f"]{
+  --bg:#FAF8F2; --ink:#111111; --muted:#5B5B52; --card:#FFFFFF; --line:#C9C5B8;
+  --head-bg:#FFFFFF; --head-shadow:0 10px 24px rgba(17,17,17,.07);
+  --track:#E6E3D8; --barfill:#111111; --bartxt:#111111; --barh:14px;
+  --tabon:#111111; --tabonink:#FFFFFF; --tabonborder:transparent;
+  --checkr:50%; --checkon:#D8FF3E; --chipr:999px; --chipbg:#F1EEE4; --chipink:#111111; --chipb:0px;
+  --cta:#111111; --ctaInk:#FFFFFF; --ctab:0px; --cta-shadow:0 10px 22px rgba(17,17,17,.16);
+  --item-shadow:0 8px 20px rgba(17,17,17,.06); --hot:#C2410C; --danger:#A3341C;
+  --radius:13px; --bw:0px; --gap:7px; --pad:19px;
+  --font-display:ui-rounded,"SF Pro Rounded","Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+  --font-body:ui-rounded,"SF Pro Rounded","Segoe UI","Microsoft JhengHei",system-ui,sans-serif;
+  --h1:27px; --h1w:780; --h1ls:-.6px;
+}
+/* 上半部（圖 1）：頁首卡 26→13px、色帶 99→2px、分段 999→12px */
+.phone[data-theme="f"] .fx-head{border-radius:13px;padding:9px 12px}
+.phone[data-theme="f"] .fx-ring{border-radius:50%;width:56px;height:56px}
+.phone[data-theme="f"] .fx-ring::before{border-radius:50%;inset:7px}
+.phone[data-theme="f"] .fx-band{border-radius:2px;height:3px;margin-top:3px}
+.phone[data-theme="f"] .fx-seg{border-radius:12px;padding:3px}
+.phone[data-theme="f"] .fx-seg button{border-radius:9px;min-height:44px}
+.phone[data-theme="f"] .fx-h1{font-size:24px}
+/* 下半部（圖 2）：篩選 16→8px、卡片 22→11px、CTA 膠囊等效 27→13px */
+.phone[data-theme="f"] .wf-sel{border-radius:8px;border:1px solid #E6E3D8;background:#fff;font-size:12.5px}
+.phone[data-theme="f"] .wf-item{border-radius:11px;padding:5px 10px;min-height:52px;gap:10px;border:1px solid #E6E3D8}
+.phone[data-theme="f"] .wf-item-title{font-size:15.5px}
+.phone[data-theme="f"] .wf-item-meta{margin-top:2px;flex-wrap:wrap;overflow:visible;gap:4px}
+.phone[data-theme="f"] .wf-due{font-size:10.5px;white-space:nowrap;flex:none}
+.phone[data-theme="f"] .wf-chip{border-radius:6px;padding:1px 6px;font-size:10px;flex:none}
+.phone[data-theme="f"] .wf-note{padding-top:2px;font-size:10px}
+.phone[data-theme="f"] .wf-primary{border-radius:13px;background:#111;justify-content:flex-start;padding-left:20px;position:relative;min-height:54px}
+.phone[data-theme="f"] .wf-primary::after{content:"→";position:absolute;right:6px;top:6px;bottom:6px;width:42px;border-radius:50%;background:#D8FF3E;color:#111;display:grid;place-items:center;font-size:20px;font-weight:800}
+/* 主要操作頁（沿用 D 結構，圓角一律減半） */
+.phone[data-theme="f"] .f-panel{border-radius:13px;padding:10px}
+.phone[data-theme="f"] .f-input{border-radius:8px;border:1px solid #E6E3D8;background:#fff;min-height:46px;padding:8px 11px}
+.phone[data-theme="f"] .f-chip{border-radius:6px;border:1px solid #E6E3D8;min-height:44px;padding:6px 10px;font-size:13px}
+.phone[data-theme="f"] .f-chip.on{background:#D8FF3E;border-color:#D8FF3E;color:#111}
+.phone[data-theme="f"] .f-back{border-radius:8px;border:1px solid #E6E3D8}
+.phone[data-theme="f"] .f-today{border-radius:8px;background:#F1EEE4;color:#111}
+.phone[data-theme="f"] .f-save{border-radius:13px;background:#111;min-height:52px}
+.phone[data-theme="f"] .f-del,.phone[data-theme="f"] .f-cancel{border-radius:8px;border:1px solid #E6E3D8;min-height:46px}
+.phone[data-theme="f"] .f-feedback{border-radius:8px;border:1px dashed #C9C5B8;background:#F4F1E8;padding:7px 9px;font-size:10.5px;line-height:1.3}
+.phone[data-theme="f"] .f-title{font-size:27px;white-space:nowrap;line-height:1.12}
+.phone[data-theme="f"] .f-kicker{font-family:ui-monospace,Consolas,monospace;letter-spacing:.14em;font-size:10px}
+/* F 版面節奏：同 D/E 一樣避免 flex 壓縮，CTA 用 auto margin 推落底 */
+.phone[data-theme="f"] .p-screen--fusion .z{margin-bottom:7px}
+.phone[data-theme="f"] .p-screen--fusion .z-label{font-size:9.5px;padding:1px 5px;margin-bottom:2px}
+.phone[data-theme="f"] .p-screen--fusion .z-list{flex:none;display:block}
+.phone[data-theme="f"] .p-screen--fusion .z-cta{margin-top:auto}
+.phone[data-theme="f"] .p-screen--fusion .wf-list{gap:7px}
+.phone[data-theme="f"] .p-screen--fform .z{margin-bottom:3px}
+.phone[data-theme="f"] .p-screen--fform .z-label{font-size:9.5px;padding:1px 5px;margin-bottom:1px}
+.phone[data-theme="f"] .p-screen--fform .f-head{padding:0}
+.phone[data-theme="f"] .p-screen--fform .f-field{gap:3px}
+.phone[data-theme="f"] .p-screen--fform .f-hint{font-size:10.5px;line-height:1.3}
+.phone[data-theme="f"] .p-screen--fform .f-label{font-size:14px}
+.phone[data-theme="f"] .p-screen--fform .f-actions{gap:6px}
+.phone[data-theme="f"] .p-screen--fform .f-panel .z + .z{margin-top:0}
+
+/* ---------- Footer ---------- */
+footer{border-top:1px solid var(--c-line);background:#fff;padding:26px 0 40px;color:var(--c-muted);font-size:13.5px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-start}
+footer b{color:var(--c-ink)}
+.notice{padding:12px 16px;border-radius:11px;background:#EAF6EE;border:1px solid #BFE3CA;color:#1B6B36;font-size:14px;font-weight:650;margin-bottom:20px}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1100px){
+  .grid-3,.mini-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .legend-grid,.token-grid,.grid-2{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .phones-row{grid-template-columns:1fr}
+  .switcher-bar{top:0;position:sticky}
+  .topbar{position:static}
+}
+@media (max-width:680px){
+  .wrap{padding:0 16px}
+  .grid-3,.mini-grid{grid-template-columns:1fr}
+  .tt h1{font-size:18px}
+  .detail-hero h2{font-size:22px}
+  .phone{width:min(340px,calc(100vw - 46px))}
+  .mini-stage .phone{width:340px}
+  .mini-stage{height:584px}
+  .tab{padding:9px 10px;font-size:14px;flex:1 1 calc(50% - 4px);justify-content:center}
+  .switcher{flex-wrap:wrap;overflow-x:visible}
+  .pad{padding:16px}
+  table{min-width:560px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到主要內容</a>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 17.5h7M17.5 14v7"/></svg>
+    </div>
+    <div class="tt">
+      <h1>Todo Webapp｜三款手機優先主題提案</h1>
+      <p>依據 <code>docs/spec.md</code> v1.0（2026-11-05）· 單一離線 HTML · 三方案共用同一資訊架構</p>
+    </div>
+    <div class="tools">
+      <span class="pill" id="pref-pill" aria-live="polite">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l2.4 6.9H21l-5.4 4 2 7-5.6-4-5.6 4 2-7-5.4-4h6.6z"/></svg>
+        <span id="pref-text">未揀選方案</span>
+      </span>
+      <button class="ghost-btn" id="notes-toggle" type="button" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="17" r="3"/></svg>
+        <span id="notes-text">隱藏標註</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="switcher-bar">
+  <div class="wrap">
+    <nav class="switcher" role="tablist" aria-label="方案切換">
+      <button class="tab" type="button" role="tab" id="tab-compare" data-panel="panel-compare" aria-controls="panel-compare" aria-selected="true"><span class="num">00</span>並排對照</button>
+      <button class="tab" type="button" role="tab" id="tab-a" data-panel="panel-a" aria-controls="panel-a" aria-selected="false"><span class="dot" style="background:#4F46E5"></span><span class="num">A</span>Candy Pop</button>
+      <button class="tab" type="button" role="tab" id="tab-b" data-panel="panel-b" aria-controls="panel-b" aria-selected="false"><span class="dot" style="background:#3B82F6"></span><span class="num">B</span>Jelly Flow</button>
+      <button class="tab" type="button" role="tab" id="tab-c" data-panel="panel-c" aria-controls="panel-c" aria-selected="false"><span class="dot" style="background:#D8FF3E;border:1px solid #111"></span><span class="num">C</span>Bright Editorial</button>
+      <button class="tab" type="button" role="tab" id="tab-fusion" data-panel="panel-fusion" aria-controls="panel-fusion" aria-selected="false"><span class="dot" style="background:#111;border:3px solid #D8FF3E"></span><span class="num">D·E</span>融合變體</button>
+    </nav>
+  </div>
+</div>
+
+<main id="main" class="wrap">
+  <div id="pick-notice" class="notice" hidden></div>
+
+  <!-- ======================= 並排對照 ======================= -->
+  <section id="panel-compare" role="tabpanel" aria-labelledby="tab-compare">
+    <div class="callout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+      <div><strong>參考資料唔係空白，所以冇用通用佔位內容。</strong>三個方案嘅畫面、欄位、狀態、流程全部取自 <code>docs/spec.md</code>：Google 登入、CRUD 五件事、<code>due_at</code>、多選 tags、狀態 tab、分類篩選、排序、已完成置底、寫入後整表重繪。只有「品牌名／示範待辦資料／字體／色值」屬可替換位，已用 <code>⟨⟩</code> 虛線標記，詳見下方「可替換位置」。</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="kicker">01 / Style Cards</span><h2>三款主題一覽</h2><p>三款都係明亮、活潑、時尚，但刻意喺四個維度拉開差異；功能範圍同資訊架構完全對齊，方便直接比較。</p></div>
+      <div class="grid-3" id="compare-cards"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="kicker">02 / Dimension Matrix</span><h2>差異對照表</h2><p>左欄係比較維度；「相同」嘅項目代表三個方案一致，唔需要取捨。</p></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>比較維度</th><th>A · Candy Pop</th><th>B · Jelly Flow</th><th>C · Bright Editorial</th></tr></thead>
+          <tbody>
+            <tr><th>色彩</th><td>奶油黃底 ＋ 靛紫／檸檬黃／橙撞色<span class="tiny">高飽和、色塊對撞</span></td><td>冰藍白底 ＋ 粉紫→寶藍漸層、蜜桃點綴<span class="tiny">低飽和、同色系過渡</span></td><td>米白紙感 ＋ 黑白為主、檸檬黃綠／珊瑚點綴<span class="tiny">近乎無彩色，靠螢光色做焦點</span></td></tr>
+            <tr><th>視覺節奏</th><td>高密度、卡片牆、間距 10px<span class="tiny">硬陰影製造前後層次</span></td><td>大留白、分組浮動卡、間距 14–20px<span class="tiny">柔和光暈，呼吸感最強</span></td><td>線性單欄、1px 分隔線、序號<span class="tiny">雜誌式垂直節奏，零卡片</span></td></tr>
+            <tr><th>元件形狀</th><td>14px 圓角 ＋ 3px 粗黑描邊 ＋ 4px 硬陰影<span class="tiny">圓形 checkbox、粗框 pill</span></td><td>24–28px 大圓角 ＋ 零描邊 ＋ 柔光<span class="tiny">圓形 checkbox、全膠囊按鈕</span></td><td>0px 直角 ＋ 1px 細線 ＋ 無陰影<span class="tiny">底線式輸入、方形編號、圓形 checkbox</span></td></tr>
+            <tr><th>排版配置</th><td>特粗無襯線大標題 33px、置左、緊密兩欄篩選<span class="tiny">Arial Black 類 display</span></td><td>圓體標題 29px、置左漸層卡、橫向 pill 分類<span class="tiny">ui-rounded 類 display</span></td><td>斜體襯線刊頭 37px、大序號、uppercase kicker<span class="tiny">Georgia 類 display ＋ 等寬小字</span></td></tr>
+            <tr><th>內文／標題字級</th><td>16.5 / 33px</td><td>16.5 / 29px</td><td>16 / 37px</td></tr>
+            <tr><th>主要 CTA</th><td>靛紫粗框方角按鈕 ＋ 黃色硬陰影</td><td>全寬漸層膠囊 ＋ 藍色柔光</td><td>黑色長條 ＋ 檸檬黃綠箭嘴方塊</td></tr>
+            <tr><th>適合揀嘅情境</th><td>想要強記憶點、年輕活力、一眼認得品牌</td><td>想要舒服耐睇、低壓迫感、日常長用</td><td>想要質感同排版個性、文字優先、唔鍾意卡片</td></tr>
+            <tr><th>功能範圍 / IA</th><td class="ok">相同 ✓</td><td class="ok">相同 ✓</td><td class="ok">相同 ✓</td></tr>
+            <tr><th>觸控 / 無障礙</th><td class="ok">≥44px · AA ✓</td><td class="ok">≥44px · AA ✓</td><td class="ok">≥44px · AA ✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-head"><span class="kicker">03 / Side by Side</span><h2>三款「首頁」並排對照</h2><p>同一份資料、同一組區塊編號 ①–⑤，只換主題。呢度係縮圖；撳「檢視完整方案」會見到首頁 ＋ 主要操作頁全尺寸 wireframe 同標註。</p></div>
+      <div class="mini-grid" id="compare-wireframes"></div>
+    </div>
+
+    <div class="sec grid-2">
+      <div class="card pad">
+        <div class="sec-head" style="margin-bottom:10px"><span class="kicker">04 / Shared IA</span><h2 style="font-size:19px">共用資訊架構（源自 spec）</h2></div>
+        <div class="tbl-wrap" style="border:0">
+          <table style="min-width:0">
+            <thead><tr><th>層級</th><th>畫面／區塊</th><th>spec 依據</th></tr></thead>
+            <tbody>
+              <tr><td>閘門</td><td>「以 Google 登入」單一按鈕；<code>#login-view</code> / <code>#app-view</code> 用 <code>hidden</code> 切換</td><td>§3.1 · §6.2</td></tr>
+              <tr><td>① 頁首</td><td>H1 品牌／問候 ＋ 完成進度摘要</td><td>§3.5 · §6.2</td></tr>
+              <tr><td>② 狀態導覽</td><td>全部／未完成／已完成 tab，偏好記 <code>localStorage</code></td><td>§3.5</td></tr>
+              <tr><td>③ 篩選控制</td><td>排序（到期日／建立時間／分類）＋ 分類下拉（自己 tags 聯集）</td><td>§3.4 · §3.5</td></tr>
+              <tr><td>④ 清單</td><td>H2 標題、L3 日期／tags、勾選、inline 改標題、刪除；已完成置底</td><td>§3.2 · §3.3</td></tr>
+              <tr><td>⑤ 主要 CTA</td><td>底部固定「新增待辦」→ 開主要操作頁</td><td>§3.2 · §6.2</td></tr>
+              <tr><td>操作頁</td><td>標題（1–200 字）、<code>&lt;input type="date"&gt;</code>、tags 多選（≤10 個、1–30 字、去重）、儲存／刪除／取消</td><td>§3.2–3.4</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card pad">
+        <div class="sec-head" style="margin-bottom:10px"><span class="kicker">05 / Replaceable</span><h2 style="font-size:19px">可替換位置</h2></div>
+        <ul class="repl-list">
+          <li><span><b>App 名稱／頁首文案</b>：而家用「今日要做」，wireframe 上標 <code>⟨名稱⟩</code>。三個方案刻意用同一名稱，方便比較排版而非比較文案。</span></li>
+          <li><span><b>示範待辦資料</b>：<code>交課程計劃書</code>、<code>2026-11-20</code>、tags「工作／急」取自 spec §5 範例；其餘幾條係展示用，標 <code>⟨示範資料⟩</code>，可整套換成真實資料。</span></li>
+          <li><span><b>字體</b>：本頁為零依賴離線檔，用 system font stack 模擬三種字感；上線建議 A = Baloo 2、B = Nunito Sans / Varela Round、C = Libre Bodoni + Public Sans。若改走 CDN，要按 spec §6.1 做釘版 ＋ SRI ＋ CSP，SRI hash 執行時實計，唔准寫死。</span></li>
+          <li><span><b>色值與圓角</b>：可換成品牌色，但換完要重驗文字對比 ≥4.5:1（尤其 B 嘅漸層 CTA 同 C 嘅螢光色塊）。</span></li>
+          <li><span><b>進度摘要計算方式</b>：而家寫「1 / 4 完成」，spec 未規定文案，屬 UI 自由位。</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sec card pad">
+      <div class="sec-head" style="margin-bottom:10px"><span class="kicker">06 / How to choose</span><h2 style="font-size:19px">點樣揀</h2></div>
+      <p style="font-size:14.5px;color:var(--c-muted);max-width:90ch">先喺上面「並排對照」用同一組資料睇三款首頁嘅第一眼感覺，再逐個撳入去睇兩屏 wireframe 嘅區塊標註同操作流程。揀好之後撳「揀呢個方案」，本頁會記低偏好（存喺本機瀏覽器）；之后可以直接報方案代號俾我，我會按 <code>docs/spec.md</code> 嘅 Vanilla JS ＋ 零 build 約束落實做 design tokens 同 <code>public/</code> 頁面。</p>
+    </div>
+  </section>
+
+  <!-- ======================= 三個方案詳細頁（由 JS 生成） ======================= -->
+  <section id="panel-a" role="tabpanel" aria-labelledby="tab-a" hidden></section>
+  <section id="panel-b" role="tabpanel" aria-labelledby="tab-b" hidden></section>
+  <section id="panel-c" role="tabpanel" aria-labelledby="tab-c" hidden></section>
+
+  <!-- ======================= 融合變體 D / E（由 JS 生成） ======================= -->
+  <section id="panel-fusion" role="tabpanel" aria-labelledby="tab-fusion" hidden></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><b>Todo Webapp 主題提案</b> · 設計：UI Designer（像素君）· 依據 <code>docs/spec.md</code> v1.0 · 2026-11-05<br>單一 HTML、零外部依賴、可直接離線開啟；本頁係設計提案，唔係 production code。</div>
+    <div>手機優先 · 內文 16–17px · 標題 29–37px · 觸控目標 ≥44px · WCAG AA 對比 · <code>prefers-reduced-motion</code> 已處理</div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   Inline SVG icon set（統一 24×24 viewBox，無 emoji）
+   ============================================================ */
+const S = (p, extra) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>';
+const I = {
+  plus:    S('<path d="M12 5v14M5 12h14"/>'),
+  check:   S('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  chev:    S('<path d="M6 9l6 6 6-6"/>'),
+  cal:     S('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>'),
+  edit:    S('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>'),
+  trash:   S('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/>'),
+  back:    S('<path d="M19 12H5M11 18l-6-6 6-6"/>'),
+  save:    S('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  info:    S('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'),
+  signal:  S('<path d="M3 17h2v3H3zM8 13h2v7H8zM13 9h2v11h-2zM18 5h2v15h-2z"/>'),
+  wifi:    S('<path d="M2 8.5a15 15 0 0120 0M5 12a10 10 0 0114 0M8.5 15.5a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/>'),
+  battery: S('<rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 10v4"/><rect x="4" y="9" width="12" height="6" fill="currentColor" stroke="none"/>'),
+  star:    S('<path d="M12 2l2.4 6.9H21l-5.4 4 2 7-5.6-4-5.6 4 2-7-5.4-4h6.6z"/>')
+};
+
+/* ============================================================
+   Theme definitions — 共用 IA，只換 design tokens
+   ============================================================ */
+const THEMES = {
+  a: {
+    code:'A', name:'Candy Pop', sub:'糖果粗框 · Claymorphism',
+    desc:'用奶油黃底、靛紫主色同檸檬黃撞色做記憶點。3px 粗描邊加 4px 硬陰影，卡片排得密，節奏明快、好玩、一眼認得。適合想令一個極簡 Todo app 有強烈品牌個性。',
+    color:'#4F46E5',
+    mood:['高密度','撞色','粗描邊','硬陰影','特粗標題'],
+    swatches:[['底','#FFF9EC','#1E1B4B'],['主','#4F46E5','#FFFFFF'],['黃','#FFD84D','#1E1B4B'],['橙','#F97316','#1E1B4B'],['字','#1E1B4B','#FFFFFF']],
+    rows:[['色彩','奶油黃 ＋ 靛紫／檸檬黃／橙撞色'],['節奏','10px 緊密卡片牆、硬陰影層次'],['形狀','14px 圓角、3px 描邊、圓形 checkbox'],['排版','Arial Black 類特粗 33px、置左'],['CTA','靛紫粗框方角 ＋ 黃色硬陰影']],
+    tokens:[['背景','#FFF9EC'],['主色 / CTA','#4F46E5'],['強調色','#FFD84D'],['文字 / 次要','#1E1B4B / #55508A'],['圓角','14px'],['描邊 / 陰影','3px 實線 / 4px 硬陰影'],['區塊間距','10–12px'],['內文 / 標題','16.5px / 33px'],['觸控目標','≥44px（CTA 54px）']],
+    font:['"Arial Black", "Segoe UI Black", system-ui','"Segoe UI", system-ui','Baloo 2 ＋ Comic Neue（上線可替換）'],
+    dims:['高飽和撞色','緊密卡片牆','粗框硬陰影','特粗無襯線']
+  },
+  b: {
+    code:'B', name:'Jelly Flow', sub:'果凍漸層 · Soft UI Evolution',
+    desc:'冰藍白底配粉紫→寶藍柔和漸層，零描邊、24–28px 大圓角、大留白同柔光。對比度最好、長時間睇最舒服，屬「耐睇型」活潑，適合每日都會開嘅工具類 app。',
+    color:'#3B82F6',
+    mood:['大留白','柔和漸層','全膠囊','柔光','圓體'],
+    swatches:[['底','#F4F8FF','#1E293B'],['主','#5B4BE0','#FFFFFF'],['藍','#2563EB','#FFFFFF'],['粉','#F0E6FF','#1E293B'],['字','#1E293B','#FFFFFF']],
+    rows:[['色彩','冰藍白 ＋ 粉紫→寶藍漸層、蜜桃點綴'],['節奏','14–20px 大留白、分組浮動卡'],['形狀','24–28px 圓角、零描邊、圓形 checkbox'],['排版','ui-rounded 類圓體 29px、漸層頁首卡'],['CTA','全寬漸層膠囊 ＋ 藍色柔光']],
+    tokens:[['背景','#F4F8FF'],['主色 / CTA','#5B4BE0 → #2563EB'],['裝飾漸層','#F0E6FF → #E3F0FF → #FFE9EF'],['文字 / 次要','#1E293B / #5A6B8C'],['圓角','24–28px（按鈕 999px）'],['描邊 / 陰影','0px / 0 8px 20px 柔光'],['區塊間距','14–20px'],['內文 / 標題','16.5px / 29px'],['觸控目標','≥44px（CTA 54px）']],
+    font:['ui-rounded, "SF Pro Rounded", "Segoe UI"','ui-rounded, "SF Pro Rounded", "Segoe UI"','Nunito Sans ＋ Varela Round（上線可替換）'],
+    dims:['同色系漸層','疏朗分組','無框大圓角','圓體標題']
+  },
+  c: {
+    code:'C', name:'Bright Editorial', sub:'明亮雜誌 · Swiss Modernism 2.0',
+    desc:'米白紙感、黑白為主，只用檸檬黃綠同珊瑚做焦點。直角、1px 細線、大序號、斜體襯線刊頭、底線式輸入，完全唔用卡片。文字優先、質感最強，適合鍾意排版個性嘅產品。',
+    color:'#D8FF3E',
+    mood:['線性單欄','直角細線','襯線刊頭','大序號','螢光焦點'],
+    swatches:[['底','#FAF8F2','#111111'],['黑','#111111','#FFFFFF'],['黃綠','#D8FF3E','#111111'],['珊瑚','#FF5A3C','#111111'],['米','#E6E3D8','#111111']],
+    rows:[['色彩','米白 ＋ 黑白，檸檬黃綠／珊瑚點綴'],['節奏','1px 分隔線、序號、大量留白'],['形狀','0px 直角、1px 細線、圓形 checkbox'],['排版','Georgia 斜體襯線 37px ＋ 等寬 kicker'],['CTA','黑色長條 ＋ 檸檬黃綠箭嘴方塊']],
+    tokens:[['背景','#FAF8F2'],['主色 / CTA','#111111'],['焦點色','#D8FF3E / #FF5A3C'],['文字 / 次要','#111111 / #5B5B52'],['圓角','0px'],['描邊 / 陰影','1px 細線 / 無陰影'],['區塊間距','0px（靠分隔線分區）'],['內文 / 標題','16px / 37px'],['觸控目標','≥44px（CTA 54px）']],
+    font:['Georgia, "Times New Roman", serif','"Segoe UI", system-ui','Libre Bodoni ＋ Public Sans（上線可替換）'],
+    dims:['近乎無彩色','線性報刊節奏','直角細線','襯線大標題']
+  }
+};
+
+/* 示範資料：標題／日期／tags 取自 spec §5 範例，其餘為展示用 */
+const DEMO = [
+  { t:'交課程計劃書',        due:'2026-11-20', tags:['工作','急'], done:false },
+  { t:'買會議用文具',        due:'今日',        tags:['個人'],      done:false },
+  { t:'覆核 ADR-004 權限模型',due:'2026-11-22', tags:['工作'],      done:false },
+  { t:'整理 Supabase redirect URL', due:'—',    tags:['工作'],      done:true  }
+];
+
+const HEAD = {
+  a:{ kicker:'今日要做',              h1:'今日 3 件事！', sub:'仲有 3 件未搞掂，衝呀' },
+  b:{ kicker:'早安，Lamsir',          h1:'今日輕鬆啲',     sub:'4 件入面完成咗 1 件' },
+  c:{ kicker:'TO DO — 05 NOV 2026',  h1:'今日要做',       sub:'未完成 03 ／ 已完成 01' }
+};
+const FORM_TITLE = { a:'新增待辦', b:'加件新待辦', c:'NEW ENTRY' };
+const ZL = (n, t) => '<span class="z-label">' + n + ' ' + t + '</span>';
+
+/* ---------- 首頁 wireframe（三個方案共用結構） ---------- */
+function homeScreen(k){
+  const h = HEAD[k];
+  const items = DEMO.map((d,i) => (
+    '<div class="wf-item ' + (d.done ? 'is-done' : '') + '" data-n="0' + (i+1) + '">' +
+      '<button class="wf-check ' + (d.done ? 'on' : '') + '" type="button" aria-label="' + (d.done ? '取消完成' : '標記完成') + '：' + d.t + '">' + (d.done ? I.check : '') + '</button>' +
+      '<div class="wf-item-main">' +
+        '<div class="wf-item-title">' + d.t + '</div>' +
+        '<div class="wf-item-meta">' +
+          '<span class="wf-due ' + (d.due === '今日' ? 'hot' : '') + '">' + I.cal + d.due + '</span>' +
+          d.tags.map(t => '<span class="wf-chip">' + t + '</span>').join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="wf-item-actions">' +
+        '<button class="wf-ico" type="button" aria-label="編輯標題">' + I.edit + '</button>' +
+        '<button class="wf-ico" type="button" aria-label="刪除待辦">' + I.trash + '</button>' +
+      '</div>' +
+    '</div>'
+  )).join('');
+
+  return '<div class="phone" data-theme="' + k + '" aria-label="方案 ' + k.toUpperCase() + ' 首頁手機 wireframe">' +
+    '<div class="p-status"><span>9:41</span><span class="p-status-i">' + I.signal + I.wifi + I.battery + '</span></div>' +
+    '<div class="p-screen p-screen--home">' +
+      '<section class="z z-head">' + ZL('①','頁首 · H1 品牌／進度摘要') +
+        '<div class="wf-head">' +
+          '<div class="wf-brand">' + h.kicker + (k === 'a' ? '<span class="repl" title="可替換：App 名稱">⟨名稱⟩</span>' : '') + '</div>' +
+          '<div class="wf-h1">' + h.h1 + '</div>' +
+          '<p class="wf-sub">' + h.sub + '</p>' +
+          '<div class="wf-bar"><span class="wf-bar-fill"></span><span class="wf-bar-txt">1 / 4 完成</span></div>' +
+        '</div>' +
+      '</section>' +
+      '<section class="z z-tabs">' + ZL('②','狀態導覽 · Tab（≥44px）') +
+        '<div class="wf-tabs">' +
+          '<button class="wf-tab" type="button">全部</button>' +
+          '<button class="wf-tab active" type="button" aria-current="true">未完成</button>' +
+          '<button class="wf-tab" type="button">已完成</button>' +
+        '</div>' +
+      '</section>' +
+      '<section class="z z-filters">' + ZL('③','篩選控制 · 排序／分類') +
+        '<div class="wf-filters">' +
+          '<button class="wf-sel" type="button">排序：到期日 ' + I.chev + '</button>' +
+          '<button class="wf-sel" type="button">分類：全部 ' + I.chev + '</button>' +
+        '</div>' +
+      '</section>' +
+      '<section class="z z-list">' + ZL('④','清單 · H2 標題 ＋ L3 輔助資訊') +
+        '<div class="wf-list">' + items + '</div>' +
+        '<p class="wf-note">已完成置底 · 排序偏好記 localStorage <span class="repl" title="可替換：示範資料">⟨示範資料⟩</span></p>' +
+      '</section>' +
+      '<section class="z z-cta">' + ZL('⑤','主要 CTA · 底部固定按鈕 ≥52px') +
+        '<div class="wf-cta">' +
+          '<button class="wf-primary" type="button">' + I.plus + '<span>新增待辦</span></button>' +
+          '<span class="tap-note">TAP ≥44px</span>' +
+        '</div>' +
+      '</section>' +
+    '</div>' +
+    '<div class="p-home"></div>' +
+  '</div>';
+}
+
+/* ---------- 主要操作頁 wireframe（三個方案共用結構） ---------- */
+function formScreen(k){
+  return '<div class="phone" data-theme="' + k + '" aria-label="方案 ' + k.toUpperCase() + ' 主要操作頁手機 wireframe">' +
+    '<div class="p-status"><span>9:41</span><span class="p-status-i">' + I.signal + I.wifi + I.battery + '</span></div>' +
+    '<div class="p-screen p-screen--form">' +
+      '<section class="z">' + ZL('①','返回 ＋ H1 頁首') +
+        '<div class="f-head"><button class="f-back" type="button" aria-label="返回清單">' + I.back + '</button>' +
+          '<div><div class="f-kicker">TODO / EDIT ENTRY</div><div class="f-title">' + FORM_TITLE[k] + '</div></div>' +
+        '</div>' +
+      '</section>' +
+      '<section class="z">' + ZL('②','主要欄位 · H2 label ＋ 文字輸入') +
+        '<div class="f-field">' +
+          '<label class="f-label" for="f-title-' + k + '">待辦標題 <span class="req">必填</span></label>' +
+          '<input class="f-input" id="f-title-' + k + '" type="text" value="交課程計劃書" maxlength="200" placeholder="想做啲咩？">' +
+          '<span class="f-hint">1–200 字 · 可直接 inline 改標題 <span class="repl" title="可替換：示範資料">⟨示範資料⟩</span></span>' +
+        '</div>' +
+      '</section>' +
+      '<section class="z">' + ZL('③','次要欄位 · 到期日（可留空）') +
+        '<div class="f-field">' +
+          '<label class="f-label" for="f-date-' + k + '">到期日</label>' +
+          '<div class="f-date-row">' +
+            '<input class="f-input" id="f-date-' + k + '" type="date" value="2026-11-20">' +
+            '<span class="f-today">今日／逾期提示</span>' +
+          '</div>' +
+          '<span class="f-hint">只存 YYYY-MM-DD · 前端比對本機日期，唔做時區轉換</span>' +
+        '</div>' +
+      '</section>' +
+      '<section class="z">' + ZL('④','Tags 多選 · chips ≥44px') +
+        '<div class="f-field">' +
+          '<label class="f-label">分類標籤</label>' +
+          '<div class="f-chips">' +
+            '<button class="f-chip on" type="button" aria-pressed="true">' + I.check + '工作</button>' +
+            '<button class="f-chip on" type="button" aria-pressed="true">' + I.check + '急</button>' +
+            '<button class="f-chip" type="button" aria-pressed="false">個人</button>' +
+            '<button class="f-chip" type="button" aria-pressed="false">' + I.plus + '新增標籤</button>' +
+          '</div>' +
+          '<span class="f-hint">最多 10 個 · 每個 1–30 字 · 寫入端 Set 去重</span>' +
+        '</div>' +
+      '</section>' +
+      '<section class="z">' + ZL('⑤','動作區 · 按鈕位置（主／次／破壞性）') +
+        '<div class="f-actions">' +
+          '<button class="f-save" type="button">' + I.save + '建立待辦 <span class="tap-note">TAP ≥44px</span></button>' +
+          '<div class="f-row">' +
+            '<button class="f-del" type="button">刪除待辦</button>' +
+            '<button class="f-cancel" type="button">取消</button>' +
+          '</div>' +
+        '</div>' +
+      '</section>' +
+      '<section class="z">' + ZL('⑥','狀態回饋 · 寫入後流程') +
+        '<div class="f-feedback">' + I.info +
+          '<span>送出後按鈕 disable 到回應；成功 <code>201</code> → <code>GET /api/todos</code> 整表重繪 → 返回首頁。失敗顯示錯誤、畫面不變、唔做 optimistic update。</span>' +
+        '</div>' +
+      '</section>' +
+    '</div>' +
+    '<div class="p-home"></div>' +
+  '</div>';
+}
+
+/* ---------- 風格卡 ---------- */
+function styleCard(k){
+  const t = THEMES[k];
+  return '<article class="card style-card">' +
+    '<div class="sc-top">' +
+      '<div class="sc-code"><i style="background:' + t.color + '"></i>方案 ' + t.code + ' / 03</div>' +
+      '<h3>' + t.name + '</h3><div class="sub">' + t.sub + '</div>' +
+      '<p>' + t.desc + '</p>' +
+    '</div>' +
+    '<div class="swatches">' + t.swatches.map(s => '<div style="background:' + s[1] + ';color:' + s[2] + '">' + s[0] + ' ' + s[1] + '</div>').join('') + '</div>' +
+    '<div class="sc-body">' + t.rows.map(r => '<div class="sc-row"><b>' + r[0] + '</b><span>' + r[1] + '</span></div>').join('') + '</div>' +
+    '<div class="sc-foot">' +
+      '<button class="pick-btn" type="button" data-pick="' + k + '">' + I.star + '揀呢個方案</button>' +
+      '<button class="view-btn" type="button" data-view="' + k + '">檢視完整 wireframe →</button>' +
+    '</div>' +
+  '</article>';
+}
+
+/* ---------- 並排縮圖卡 ---------- */
+function miniCard(k){
+  const t = THEMES[k];
+  return '<article class="card mini-card">' +
+    '<h3><i style="background:' + t.color + '"></i>方案 ' + t.code + ' · ' + t.name + '｜首頁</h3>' +
+    '<div class="mini-stage">' + homeScreen(k) + '</div>' +
+    '<div class="mini-foot"><span>' + t.dims.join(' · ') + '</span><button class="link-btn" type="button" data-view="' + k + '">檢視完整方案</button></div>' +
+  '</article>';
+}
+
+/* ---------- 詳細頁 ---------- */
+function detailHTML(k){
+  const t = THEMES[k];
+  const tokens = t.tokens.map(row => {
+    const isHex = /^#/.test(row[1]);
+    return '<tr><th>' + row[0] + '</th><td>' + (isHex ? '<span class="hex"><i style="background:' + row[1] + '"></i>' + row[1] + '</span>' : row[1]) + '</td></tr>';
+  }).join('');
+
+  return '' +
+  '<div class="detail-hero">' +
+    '<div class="dh-main">' +
+      '<div class="dh-tag">方案 ' + t.code + ' / 03 · 手機優先 wireframe</div>' +
+      '<h2>' + t.name + '　' + t.sub + '</h2>' +
+      '<p>' + t.desc + '</p>' +
+      '<div class="dh-badges">' + t.mood.map(m => '<span>' + m + '</span>').join('') + '</div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+      '<button class="pick-btn" type="button" data-pick="' + k + '">' + I.star + '揀呢個方案</button>' +
+      '<button class="view-btn" type="button" data-view="compare">← 返去並排對照</button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="sec">' +
+    '<div class="sec-head"><span class="kicker">Wireframes</span><h2>手機版 wireframe（375px 級距）</h2><p>兩屏共用區塊編號 ①–⑥；黃色虛線係版面標註，粉紅色 ⟨⟩ 係可替換位置，綠色係觸控尺寸。可用頁頂「隱藏標註」睇純視覺版。App 內嘅 H1／H2 喺本比較頁降階顯示，層級對照以右表為準。</p></div>' +
+    '<div class="phones-row">' +
+      '<div class="phone-cell"><div class="cap">首頁 · 待辦清單</div><div class="cap-sub">#app-view ／ GET /api/todos</div><div class="phone-stage">' + homeScreen(k) + '</div></div>' +
+      '<div class="phone-cell"><div class="cap">主要操作頁 · 新增／編輯待辦</div><div class="cap-sub">POST /api/todos ／ PATCH /api/todos/:id</div><div class="phone-stage">' + formScreen(k) + '</div></div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="legend-grid">' +
+    '<div class="card pad">' +
+      '<h3>版面區塊 · 內容層級 · 按鈕位置<small>三個方案編號與順序完全一致</small></h3>' +
+      '<ul class="zone-list">' +
+        '<li><span class="zn">①</span><div><b>頁首／App H1</b><span>品牌名、問候、完成進度。方案 B 係漸層卡、C 係刊頭細線。操作頁則係「返回 ＋ H1」。</span></div></li>' +
+        '<li><span class="zn">②</span><div><b>狀態導覽 / 主要欄位</b><span>首頁：全部／未完成／已完成 tab，每個 ≥44px。操作頁：待辦標題 H2 label ＋ 52px 輸入框。</span></div></li>' +
+        '<li><span class="zn">③</span><div><b>篩選控制 / 到期日</b><span>首頁：排序 ＋ 分類下拉。操作頁：date input ＋ 今日／逾期提示。兩者都係次要層級。</span></div></li>' +
+        '<li><span class="zn">④</span><div><b>清單主體 / Tags 多選</b><span>首頁：H2 標題 16–16.5px ＋ L3 日期／tags，每列有勾選、編輯、刪除（各 ≥44px 觸控區）。操作頁：chips ≥44px。</span></div></li>' +
+        '<li><span class="zn">⑤</span><div><b>主要 CTA / 動作區</b><span>底部固定，54–56px 高：主按鈕（建立／儲存）、次要（取消）、破壞性（刪除）分開擺，相鄰間距 ≥8px。</span></div></li>' +
+        '<li><span class="zn">⑥</span><div><b>狀態回饋</b><span>操作頁底部：送出後 disable、成功後重繪、失敗保留畫面並顯示錯誤。</span></div></li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="card pad">' +
+      '<h3>基本操作流程<small>源自 spec §3.1 / §3.2 / §6.2，三方案相同</small></h3>' +
+      '<ol class="flow">' +
+        '<li><b>身份閘門</b>撳「以 Google 登入」<em>Supabase PKCE → ?code= → JWT</em></li>' +
+        '<li><b>載入首頁</b>切到 #app-view，撈清單<em>GET /api/todos?sort=&amp;status=&amp;tag=</em></li>' +
+        '<li><b>開主要操作頁</b>撳底部 ⑤ 主要 CTA<em>顯示 title / due_at / tags 表單</em></li>' +
+        '<li><b>填寫並送出</b>按鈕即時 disable 到回應<em>POST /api/todos → 201</em></li>' +
+        '<li><b>整表重繪</b>再拎一次清單，返回首頁<em>GET /api/todos（唔做 optimistic update）</em></li>' +
+        '<li><b>捷徑操作</b>勾選／inline 改標題／刪除<em>PATCH、PATCH、DELETE → 全部重繪</em></li>' +
+      '</ol>' +
+      '<div class="flow-note">排序與狀態偏好記 <code>localStorage</code>；<code>tag</code> 唔持久化；已完成一律置底。三款主題只改外觀，呢條流程一個字都冇改。</div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="sec">' +
+    '<div class="sec-head"><span class="kicker">Design Tokens</span><h2>設計代幣與字體</h2><p>可直接轉做 <code>:root</code> CSS variables；色值已按 WCAG AA 4.5:1 檢查文字對比。</p></div>' +
+    '<div class="token-grid">' +
+      '<div class="tbl-wrap"><table class="token-tbl"><thead><tr><th>代幣</th><th>值</th></tr></thead><tbody>' + tokens + '</tbody></table></div>' +
+      '<div class="card pad">' +
+        '<h3 style="font-size:17px;font-weight:780;margin-bottom:12px">字體與可替換位</h3>' +
+        '<div class="sc-row" style="margin-bottom:10px"><b>Display</b><span style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">' + t.font[0] + '</span></div>' +
+        '<div class="sc-row" style="margin-bottom:10px"><b>Body</b><span style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">' + t.font[1] + '</span></div>' +
+        '<div class="sc-row" style="margin-bottom:14px"><b>上線建議</b><span>' + t.font[2] + '</span></div>' +
+        '<ul class="repl-list">' +
+          '<li><span><b>⟨名稱⟩</b> App 名同頁首文案可整套替換。</span></li>' +
+          '<li><span><b>⟨示範資料⟩</b> 待辦標題、日期、tags 可換成真實資料。</span></li>' +
+          '<li><span><b>字體／色值</b> 若改用 CDN 字體，要按 spec §6.1 補釘版、SRI 同 CSP；SRI hash 執行時實計，唔准寫死喺文件同 code。</span></li>' +
+        '</ul>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ============================================================
+   融合變體 D / E — 沿用既有內容層級與功能範圍，只改版面配置
+   刻意不寫任何 API / 儲存 / 框架等技術實作細節，亦不新增頁面類型
+   ============================================================ */
+const FUSION = {
+  d:{
+    code:'D', name:'Soft Editorial', sub:'對稱單欄 · 線性節奏',
+    tag:'單欄穩定型',
+    desc:'頁首、導覽、清單、CTA 全部置左對稱、等寬垂直排列；一項一卡、進度用水平條。最接近原本 Jelly Flow 嘅使用手感，只係換成 Editorial 嘅黑白黃綠配色。',
+    diffs:[
+      '頁首係左右對稱嘅單欄大圓角白卡，頂部一條檸檬黃綠色帶；進度用水平圓角條，唔用圓環。',
+      '導覽固定喺頁首正下方，三段等寬 pill；排序同分類另成兩欄一列，層級次於導覽。',
+      '主要內容係「一項一卡」嘅線性清單，四張等高圓角卡垂直排，已完成嗰張置底灰化。',
+      '主要 CTA 係底部全寬黑色膠囊，右側嵌一個圓形黃綠箭嘴，同圓形 checkbox 呼應。',
+      '區塊比例偏平均（頁首／導覽／清單約 1 : 0.5 : 2.4），節奏穩定、适合由上而下掃視。'
+    ],
+    scenario:'待辦數量偏多、需要長時間穩定掃視同逐項核对；想要 Jelly Flow 嘅耐睇同易讀，但換成 Editorial 嘅黑白質感同強對比。適合日常高頻、內容密集嘅清單。',
+    swatches:[['底','#FAF8F2','#111111'],['主','#111111','#FFFFFF'],['輔','#D8FF3E','#111111'],['警示','#FF5A3C','#111111'],['卡','#FFFFFF','#111111']]
+  },
+  e:{
+    code:'E', name:'Asymmetric Focus', sub:'不對稱雙欄 · 分組焦點',
+    tag:'雙欄焦點型',
+    desc:'頁首拆成左右不對稱兩欄（標題／圓形進度環），導覽升級成黑色分段控制，清單改按時段分組，CTA 收成右下浮動圓形按鈕。視覺重心明顯上移。',
+    diffs:[
+      '頁首改不對稱雙欄：左邊 H1 同 kicker，右邊 74px 圓形進度環；底下加一條珊瑚→黃綠色帶做節奏斷點。',
+      '導覽變成置中黑色分段控制，分類 chips 獨立成第二列；導覽嘅視覺權重比 D 明顯提高。',
+      '主要內容由「逐項卡」改成「時段分組卡」（今日／之後／已完成置底），一張卡入面多列共用 1px 細線。',
+      '主要 CTA 由底部全寬長條改成右下 60px 浮動圓形 FAB，騰返空間俾分組卡。',
+      '區塊比例「頭重尾輕」：頁首＋導覽佔近一半高度，焦點集中喺今日進度同即時新增。'
+    ],
+    scenario:'待辦數量少、以「今日先做乜」決策為主；想要一眼睇到完成率、分組更清楚、並用最少動作新增。適合焦點式、輕量、每日快速清空嘅使用情境。',
+    swatches:[['底','#FAF8F2','#111111'],['主','#111111','#FFFFFF'],['輔','#D8FF3E','#111111'],['警示','#FF5A3C','#111111'],['卡','#FFFFFF','#111111']]
+  },
+  f:{
+    code:'F', name:'Split Hybrid', sub:'上下拼接 · 圓角減半',
+    tag:'選定合併版',
+    desc:'上半部完整取圖 1（不對稱雙欄頁首＋圓形進度環＋珊瑚黃綠色帶＋黑色分段導覽），下半部取圖 2 由「排序／分類」開始（線性清單＋底部全寬膠囊 CTA）。兩張圖各自帶狀態導覽，拼接時保留上半部嘅黑色分段、跳過下半部嘅白色 pill，避免功能重複。所有矩形元件圓角半徑相對 D／E 減 50%。',
+    diffs:[
+      '上半部：不對稱雙欄頁首、圓形進度環、珊瑚→黃綠色帶、黑色分段導覽，全部來自圖 1。',
+      '下半部：由「排序／分類」開始，接線性一項一卡清單（含已完成置底）同黑色全寬 CTA，來自圖 2。',
+      '狀態導覽只保留一組：用上半部嘅黑色分段，跳過圖 2 頂部嘅白色 pill，功能範圍唔變。',
+      '所有矩形元件圓角減半：頁首卡 26→13px、項目卡 22→11px、篩選 16→8px、CTA 膠囊等效 27→13px。',
+      '圓形元件保持正圓：checkbox、進度環、黃綠箭嘴一律 50%，沿用上一輪硬要求。'
+    ],
+    scenario:'已經揀定「E 嘅頁首個性 ＋ D 嘅清單易讀」，想要一個可直接落實嘅最終版面；同時想整體方一點、少啲膠囊感，但唔想放棄圓形 checkbox 嘅一致性。適合作為交付前嘅定稿對照。',
+    swatches:[['底','#FAF8F2','#111111'],['主','#111111','#FFFFFF'],['輔','#D8FF3E','#111111'],['警示','#FF5A3C','#111111'],['卡','#FFFFFF','#111111']]
+  }
+};
+const FX_RADIUS = [
+  ['頁首卡','26–28px','13–14px','矩形'],
+  ['項目／分組卡','22–24px','11–12px','矩形'],
+  ['導覽分段／pill','全圓角（等效 ~25px）','12px','等效半徑減半'],
+  ['排序／分類／輸入','16px','8px','矩形'],
+  ['Tags chips','全圓角（等效 ~11px）','6px','等效半徑減半'],
+  ['主要 CTA 膠囊','全圓角（等效 ~27px）','13px','等效半徑減半'],
+  ['Checkbox／進度環／箭嘴','50% 正圓','50% 正圓','圓形元件保持']
+];
+const FX_LAYERS = [
+  ['H1 頁首標題','30px 圓體（D）／27px 圓體（E）＋ 等寬 kicker'],
+  ['H2 內容標題','16px，每條待辦嘅主要層級'],
+  ['L3 輔助資訊','11–12px，日期／tags／進度數字'],
+  ['導覽元件','44px 觸控高，D 為淺底 pill、E 為黑底分段'],
+  ['Checkbox','28px 正圓，置於 44×44 觸控區（全頁統一）'],
+  ['主要 CTA','D：54px 全寬膠囊／E：60px 圓形 FAB'],
+  ['次要元件','排序、分類、編輯、刪除，全部 ≥44px 觸控']
+];
+
+function fxItem(d,i){
+  return '<div class="wf-item ' + (d.done ? 'is-done' : '') + '" data-n="0' + (i+1) + '">' +
+    '<button class="wf-check ' + (d.done ? 'on' : '') + '" type="button" aria-label="' + (d.done ? '取消完成' : '標記完成') + '：' + d.t + '">' + (d.done ? I.check : '') + '</button>' +
+    '<div class="wf-item-main">' +
+      '<div class="wf-item-title">' + d.t + '</div>' +
+      '<div class="wf-item-meta">' +
+        '<span class="wf-due ' + (d.due === '今日' ? 'hot' : '') + '">' + I.cal + d.due + '</span>' +
+        d.tags.map(t => '<span class="wf-chip">' + t + '</span>').join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="wf-item-actions">' +
+      '<button class="wf-ico" type="button" aria-label="編輯標題">' + I.edit + '</button>' +
+      '<button class="wf-ico" type="button" aria-label="刪除待辦">' + I.trash + '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ---------- 變體 F：上半部＝圖 1（E 頁首＋黑色分段），下半部＝圖 2（D 主體） ---------- */
+function hybridHome(){
+  const head = '<div class="fx-head">' +
+      '<div><div class="fx-kicker">TO DO / 05 NOV</div><div class="fx-h1">今日要做</div><p class="fx-sub">未完成 03 ／ 已完成 01</p></div>' +
+      '<div class="fx-ring"><span>1/4</span></div>' +
+    '</div><div class="fx-band"></div>';
+  const nav = '<div class="fx-seg"><button type="button">全部</button><button class="on" type="button" aria-current="true">未完成</button><button type="button">已完成</button></div>';
+  const filters = '<div class="wf-filters"><button class="wf-sel" type="button">排序：到期日 ' + I.chev + '</button><button class="wf-sel" type="button">分類：全部 ' + I.chev + '</button></div>';
+  const list = '<div class="wf-list">' + DEMO.map(fxItem).join('') + '</div><p class="wf-note">已完成置底 · 四項依到期日排列</p>';
+  const cta = '<div class="wf-cta"><button class="wf-primary" type="button">' + I.plus + '<span>新增待辦</span></button><span class="tap-note">TAP ≥44px</span></div>';
+  return '<div class="phone" data-theme="f" aria-label="變體 F Split Hybrid 首頁 wireframe">' +
+    '<div class="p-status"><span>9:41</span><span class="p-status-i">' + I.signal + I.wifi + I.battery + '</span></div>' +
+    '<div class="p-screen p-screen--fusion">' +
+      '<section class="z z-head">' + ZL('①','頁首 · H1 ＋ 進度摘要（圖 1）') + head + '</section>' +
+      '<section class="z z-tabs">' + ZL('②','導覽位置 · 黑色分段（圖 1）') + nav + '</section>' +
+      '<section class="z z-filters">' + ZL('③','次要控制 · 排序／分類（圖 2 起）') + filters + '</section>' +
+      '<section class="z z-list">' + ZL('④','主要內容 · H2 ＋ L3（圖 2）') + list + '</section>' +
+      '<section class="z z-cta">' + ZL('⑤','主要 CTA · 按鈕位置（圖 2）') + cta + '</section>' +
+    '</div><div class="p-home"></div></div>';
+}
+
+function fusionHome(k){
+  if (k === 'f') return hybridHome();
+  const D = k === 'd';
+  const head = D
+    ? '<div class="wf-head">' +
+        '<div class="wf-brand">TO DO / 05 NOV</div>' +
+        '<div class="wf-h1">今日要做</div>' +
+        '<p class="wf-sub">4 件入面完成咗 1 件</p>' +
+        '<div class="wf-bar"><span class="wf-bar-fill"></span><span class="wf-bar-txt">1 / 4 完成</span></div>' +
+      '</div>'
+    : '<div class="fx-head">' +
+        '<div><div class="fx-kicker">TO DO / 05 NOV</div><div class="fx-h1">今日要做</div><p class="fx-sub">未完成 03 ／ 已完成 01</p></div>' +
+        '<div class="fx-ring"><span>1/4</span></div>' +
+      '</div><div class="fx-band"></div>';
+
+  const nav = D
+    ? '<div class="wf-tabs"><button class="wf-tab" type="button">全部</button><button class="wf-tab active" type="button" aria-current="true">未完成</button><button class="wf-tab" type="button">已完成</button></div>'
+    : '<div class="fx-seg"><button type="button">全部</button><button class="on" type="button" aria-current="true">未完成</button><button type="button">已完成</button></div>' +
+      '<div class="fx-cats"><span class="on">全部</span><span>工作</span><span>急</span><span>個人</span></div>';
+
+  const filters = D
+    ? '<div class="wf-filters"><button class="wf-sel" type="button">排序：到期日 ' + I.chev + '</button><button class="wf-sel" type="button">分類：全部 ' + I.chev + '</button></div>'
+    : '<div class="fx-filters"><button type="button">排序：到期日 ' + I.chev + '</button><i></i><button type="button">分類：全部 ' + I.chev + '</button></div>';
+
+  const list = D
+    ? '<div class="wf-list">' + DEMO.map(fxItem).join('') + '</div><p class="wf-note">已完成置底 · 四項依到期日排列</p>'
+    : '<div class="fx-group"><div class="fx-group-h"><i></i>今日<span>01</span></div>' + fxItem(DEMO[1],1) + '</div>' +
+      '<div class="fx-group"><div class="fx-group-h"><i></i>之後<span>02</span></div>' + fxItem(DEMO[0],0) + fxItem(DEMO[2],2) + '</div>' +
+      '<div class="fx-group done"><div class="fx-group-h"><i></i>已完成置底<span>01</span></div>' + fxItem(DEMO[3],3) + '</div>';
+
+  const cta = D
+    ? '<div class="wf-cta"><button class="wf-primary" type="button">' + I.plus + '<span>新增待辦</span></button><span class="tap-note">TAP ≥44px</span></div>'
+    : '<div class="wf-cta"><div class="fx-fab-wrap"><button class="fx-fab" type="button" aria-label="新增待辦">' + I.plus + '</button><span class="tap-note">TAP ≥44px</span></div></div>';
+
+  return '<div class="phone" data-theme="' + k + '" aria-label="融合變體 ' + k.toUpperCase() + ' 首頁 wireframe">' +
+    '<div class="p-status"><span>9:41</span><span class="p-status-i">' + I.signal + I.wifi + I.battery + '</span></div>' +
+    '<div class="p-screen p-screen--fusion">' +
+      '<section class="z z-head">' + ZL('①','頁首 · H1 ＋ 進度摘要') + head + '</section>' +
+      '<section class="z z-tabs">' + ZL('②','導覽位置 · 狀態切換') + nav + '</section>' +
+      '<section class="z z-filters">' + ZL('③','次要控制 · 排序／分類') + filters + '</section>' +
+      '<section class="z z-list">' + ZL('④','主要內容 · H2 ＋ L3') + list + '</section>' +
+      '<section class="z z-cta">' + ZL('⑤','主要 CTA · 按鈕位置') + cta + '</section>' +
+    '</div><div class="p-home"></div></div>';
+}
+
+function fusionForm(k){
+  const D = k === 'd' || k === 'f';
+  const z = (n, t, inner) => '<section class="z">' + ZL(n, t) + inner + '</section>';
+  const input = (id, val, type, ph) => '<input class="f-input" id="' + id + '" type="' + type + '" value="' + val + '" placeholder="' + ph + '">';
+
+  const head = z('①','頁首 · 返回 ＋ H1',
+    '<div class="f-head"><button class="f-back" type="button" aria-label="返回清單">' + I.back + '</button>' +
+      '<div><div class="f-kicker">TODO / EDIT ENTRY</div><div class="f-title">' + (D ? '新增待辦' : 'NEW ENTRY') + '</div></div></div>');
+
+  const title = z('②','主要欄位 · H2 label',
+    '<div class="f-field"><label class="f-label" for="fx-title-' + k + '">待辦標題 <span class="req">必填</span></label>' +
+      input('fx-title-' + k, '交課程計劃書', 'text', '想做啲咩？') +
+      '<span class="f-hint">1–200 字 <span class="repl" title="可替換：示範資料">⟨示範資料⟩</span></span></div>');
+
+  const date = z('③','次要欄位 · H2 label',
+    '<div class="f-field"><label class="f-label" for="fx-date-' + k + '">到期日</label>' +
+      '<div class="f-date-row">' + input('fx-date-' + k, '2026-11-20', 'date', '') +
+      '<span class="f-today">今日／逾期提示</span></div>' +
+      '<span class="f-hint">可留空 · 今日同逾期會有提示</span></div>');
+
+  const tags = z('④','元件層級 · 多選 chips',
+    '<div class="f-field"><label class="f-label">分類標籤</label><div class="f-chips">' +
+      '<button class="f-chip on" type="button" aria-pressed="true">' + I.check + '工作</button>' +
+      '<button class="f-chip on" type="button" aria-pressed="true">' + I.check + '急</button>' +
+      '<button class="f-chip" type="button" aria-pressed="false">個人</button>' +
+      '<button class="f-chip" type="button" aria-pressed="false">' + I.plus + '新增標籤</button></div>' +
+      '<span class="f-hint">最多 10 個 · 可多選</span></div>');
+
+  const actions = D
+    ? z('⑤','動作區 · 主／次／破壞性按鈕',
+        '<div class="f-actions"><button class="f-save" type="button">' + I.save + '建立待辦 <span class="tap-note">TAP ≥44px</span></button>' +
+        '<div class="f-row"><button class="f-del" type="button">刪除待辦</button><button class="f-cancel" type="button">取消</button></div></div>')
+    : z('⑤','動作區 · 主／次／破壞性按鈕',
+        '<div class="fx-bar"><span>建立待辦</span><button type="button" aria-label="建立待辦">' + I.check + '</button></div>' +
+        '<div class="f-row" style="margin-top:5px"><button class="f-del" type="button">刪除待辦</button><button class="f-cancel" type="button">取消</button></div>');
+
+  const feedback = z('⑥','輔助提示 · L3',
+    '<div class="f-feedback">' + I.info + '<span>送出後等一下；完成後返回清單，已完成嘅項目會排到最底。<span class="repl" title="可替換：提示文案">⟨提示文案⟩</span></span></div>');
+
+  const fields = D
+    ? '<div class="f-panel">' + title + date + tags + '</div>'
+    : '<div class="fx-card"><h4>基本資料</h4>' + title + date + '</div>' +
+      '<div class="fx-card"><h4>分類</h4>' + tags + '</div>';
+
+  return '<div class="phone" data-theme="' + k + '" aria-label="融合變體 ' + k.toUpperCase() + ' 主要操作頁 wireframe">' +
+    '<div class="p-status"><span>9:41</span><span class="p-status-i">' + I.signal + I.wifi + I.battery + '</span></div>' +
+    '<div class="p-screen p-screen--fusion p-screen--fform">' + head + fields + actions + feedback + '</div>' +
+    '<div class="p-home"></div></div>';
+}
+
+function fusionMini(k){
+  const f = FUSION[k];
+  return '<article class="card mini-card"><h3><i style="background:#111;border:3px solid #D8FF3E"></i>變體 ' + f.code + ' · ' + f.name + '｜首頁</h3>' +
+    '<div class="mini-stage">' + fusionHome(k) + '</div>' +
+    '<div class="mini-foot"><span>' + f.sub + '</span><button class="link-btn" type="button" data-view="fusion">睇完整兩屏</button></div></article>';
+}
+
+function fusionOverview(k){
+  const f = FUSION[k];
+  return '<article class="card pad">' +
+    '<div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:10px">' +
+      '<span class="fx-tag">變體 ' + f.code + '</span><span class="fx-tag lime">' + f.tag + '</span></div>' +
+    '<h3 style="font-size:21px;font-weight:800;letter-spacing:-.3px">' + f.name + '</h3>' +
+    '<div style="font-size:13.5px;font-weight:700;color:var(--c-accent);margin-top:2px">' + f.sub + '</div>' +
+    '<p style="font-size:14px;color:var(--c-muted);margin:10px 0 14px;line-height:1.6">' + f.desc + '</p>' +
+    '<div class="swatches" style="height:38px;border-radius:9px;overflow:hidden">' +
+      f.swatches.map(s => '<div style="background:' + s[1] + ';color:' + s[2] + '">' + s[0] + ' ' + s[1] + '</div>').join('') + '</div>' +
+    '<div class="fx-scenario" style="margin-top:14px"><b>適用情境：</b>' + f.scenario + '</div></article>';
+}
+
+function fusionVariantHTML(k, idx){
+  const f = FUSION[k];
+  const layers = FX_LAYERS.map(r => '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td></tr>').join('');
+  return '<div class="sec">' +
+    '<div class="sec-head"><span class="kicker">0' + idx + ' / Variant ' + f.code + ' Wireframes</span>' +
+      '<h2>變體 ' + f.code + ' · ' + f.name + '</h2>' +
+      '<p>兩屏沿用既有嘅內容層級（H1／H2／L3）同功能範圍；區塊編號 ①–⑥ 同前面方案一致，方便對照。</p></div>' +
+    '<div class="phones-row">' +
+      '<div class="phone-cell"><div class="cap">首頁 · 頁面結構與導覽位置</div><div class="cap-sub">①–⑤ 區塊</div><div class="phone-stage">' + fusionHome(k) + '</div></div>' +
+      '<div class="phone-cell"><div class="cap">主要操作頁 · 內容區塊與元件層級</div><div class="cap-sub">①–⑥ 區塊</div><div class="phone-stage">' + fusionForm(k) + '</div></div>' +
+    '</div>' +
+    '<div class="legend-grid">' +
+      '<div class="card pad"><h3>呢個變體嘅版面差異<small>相對另一個融合變體</small></h3>' +
+        '<ul class="fx-diff">' + f.diffs.map(d => '<li><span>' + d + '</span></li>').join('') + '</ul>' +
+        '<div class="fx-scenario" style="margin-top:16px"><b>適用情境：</b>' + f.scenario + '</div></div>' +
+      '<div class="card pad"><h3>元件層級與色彩層級<small>兩變體共用，只係配置唔同</small></h3>' +
+        '<div class="tbl-wrap" style="border:0"><table style="min-width:0"><thead><tr><th>層級／元件</th><th>規格</th></tr></thead><tbody>' + layers + '</tbody></table></div>' +
+        '<div class="swatches" style="height:38px;border-radius:9px;overflow:hidden;margin-top:14px">' +
+          f.swatches.map(s => '<div style="background:' + s[1] + ';color:' + s[2] + '">' + s[0] + '</div>').join('') + '</div>' +
+        '<p class="fx-legend">主色 #111111 負責文字同主要動作；輔色 #D8FF3E 只用於「完成／確認」；#FF5A3C 只用於「逾期／分組標記」；米白底＋白卡做兩層底色。黑色字配白卡對比遠高於 4.5:1。</p></div>' +
+    '</div></div>';
+}
+
+function hybridSelectedHTML(){
+  const f = FUSION.f;
+  const radiusRows = FX_RADIUS.map(r => '<tr><th>' + r[0] + '</th><td>' + r[1] + '</td><td><b>' + r[2] + '</b></td><td>' + r[3] + '</td></tr>').join('');
+  return '<div class="sec">' +
+    '<div class="sec-head"><span class="kicker">01 / Selected Hybrid</span>' +
+      '<h2>變體 F · ' + f.name + '（選定合併版）</h2>' +
+      '<p>圖 1 做上半部、圖 2 做下半部，拼成一個完整首頁；主要操作頁沿用下半部所屬嘅 D 結構。所有矩形元件圓角半徑減 50%，圓形元件保持正圓。</p></div>' +
+
+    '<div class="grid-2" style="margin-bottom:20px">' +
+      '<div class="card pad"><div style="display:flex;gap:9px;align-items:center;margin-bottom:10px"><span class="fx-tag">上半部</span><span class="fx-tag lime">圖 1</span></div>' +
+        '<h3 style="font-size:17px;font-weight:780;margin-bottom:9px">頁首 ＋ 導覽</h3>' +
+        '<ul class="fx-diff">' +
+          '<li><span>不對稱雙欄頁首：左 H1「今日要做」＋等寬 kicker，右圓形進度環 <code>1/4</code>。</span></li>' +
+          '<li><span>頁首下方一條珊瑚→檸檬黃綠色帶，做上半／下半嘅節奏斷點。</span></li>' +
+          '<li><span>黑色置中分段導覽（全部／未完成／已完成），未完成用黃綠標示。</span></li>' +
+        '</ul></div>' +
+      '<div class="card pad"><div style="display:flex;gap:9px;align-items:center;margin-bottom:10px"><span class="fx-tag">下半部</span><span class="fx-tag lime">圖 2</span></div>' +
+        '<h3 style="font-size:17px;font-weight:780;margin-bottom:9px">控制 ＋ 清單 ＋ CTA</h3>' +
+        '<ul class="fx-diff">' +
+          '<li><span>由「排序／分類」兩欄控制開始，跳過圖 2 頂部白色 pill 導覽（避免同上半部狀態切換重複）。</span></li>' +
+          '<li><span>一項一卡線性清單，四條待辦含已完成置底；每列有圓形 checkbox、日期、tags、編輯、刪除。</span></li>' +
+          '<li><span>底部全寬黑色 CTA「新增待辦」＋右側圓形黃綠箭嘴。</span></li>' +
+        '</ul></div>' +
+    '</div>' +
+
+    '<div class="phones-row">' +
+      '<div class="phone-cell"><div class="cap">首頁 · 上半圖 1 ＋ 下半圖 2</div><div class="cap-sub">①–⑤ 區塊 · 圓角減半</div><div class="phone-stage">' + hybridHome() + '</div></div>' +
+      '<div class="phone-cell"><div class="cap">主要操作頁 · 沿用下半部 D 結構</div><div class="cap-sub">①–⑥ 區塊 · 圓角減半</div><div class="phone-stage">' + fusionForm('f') + '</div></div>' +
+    '</div>' +
+
+    '<div class="legend-grid">' +
+      '<div class="card pad"><h3>版面差異與適用情境<small>相對 D／E 兩個基礎變體</small></h3>' +
+        '<ul class="fx-diff">' + f.diffs.map(d => '<li><span>' + d + '</span></li>').join('') + '</ul>' +
+        '<div class="fx-scenario" style="margin-top:16px"><b>適用情境：</b>' + f.scenario + '</div></div>' +
+      '<div class="card pad"><h3>圓角半徑減 50% 對照<small>只套用喺變體 F；D／E 維持原值</small></h3>' +
+        '<div class="tbl-wrap" style="border:0"><table style="min-width:0"><thead><tr><th>元件</th><th>D／E</th><th>F</th><th>計法</th></tr></thead><tbody>' + radiusRows + '</tbody></table></div>' +
+        '<p class="fx-legend">膠囊／pill 元件原本係 <code>border-radius:999px</code>，等於「元件高度／2」嘅全圓角；減半後改用固定 px 值先至有可見差異。圓形元件（checkbox、進度環、黃綠箭嘴）屬形狀而非邊角修飾，一律保持 <code>50%</code> 正圓，沿用上一輪硬要求。手機外框同 home indicator 屬裝置外殼，唔計入元件圓角。</p></div>' +
+    '</div></div>';
+}
+
+function fusionPanelHTML(){
+  return '<div class="callout">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>' +
+      '<div><strong>融合規則：</strong>色彩同對比沿用 <b>Bright Editorial</b>（主色／輔色／對比／色彩層級），排版沿用 <b>Jelly Flow</b>（欄位節奏／區塊比例／間距／視覺階層）。D／E 兩個變體共用同一份色彩語言同元件層級，只喺版面配置上拉開差異；<b>變體 F 係選定合併版</b>：圖 1 做上半部、圖 2 做下半部，所有矩形元件圓角半徑減 50%。內容層級同功能範圍沿用既有頁面，<b>不新增頁面、不加入技術實作細節</b>。全頁 wireframe 嘅 checkbox 一律係正圓（28px 圓圈置於 44×44 觸控區）。</div></div>' +
+
+    hybridSelectedHTML() +
+
+    '<div class="sec"><div class="sec-head"><span class="kicker">02 / Overview</span><h2>兩個基礎融合變體 D／E</h2><p>同一套配色、同一套元件，兩種版面邏輯：一個穩定單欄、一個不對稱焦點；F 就係由呢兩者各取一半拼成。</p></div>' +
+      '<div class="grid-2">' + fusionOverview('d') + fusionOverview('e') + '</div></div>' +
+
+    '<div class="sec"><div class="sec-head"><span class="kicker">03 / Difference</span><h2>版面差異對照</h2><p>淨係列 D／E「唔同」嘅位；色彩、字級階梯、觸控尺寸、功能範圍全部相同（F 另計圓角）。</p></div>' +
+      '<div class="tbl-wrap"><table><thead><tr><th>比較維度</th><th>變體 D · Soft Editorial</th><th>變體 E · Asymmetric Focus</th></tr></thead><tbody>' +
+        '<tr><th>頁首結構</th><td>對稱單欄大圓角白卡＋頂部黃綠色帶<span class="tiny">水平圓角進度條</span></td><td>不對稱雙欄（左標題／右圓形進度環）＋珊瑚→黃綠色帶</td></tr>' +
+        '<tr><th>導覽位置</th><td>頁首下方，三段等寬淺底 pill<span class="tiny">單一列</span></td><td>黑色置中分段控制，分類 chips 獨立第二列<span class="tiny">兩列、權重較高</span></td></tr>' +
+        '<tr><th>主要內容區塊</th><td>一項一卡、線性垂直排列</td><td>時段分組卡（今日／之後／已完成置底），卡內多列共用細線</td></tr>' +
+        '<tr><th>主要 CTA</th><td>底部全寬黑色膠囊＋圓形黃綠箭嘴</td><td>右下 60px 浮動圓形 FAB</td></tr>' +
+        '<tr><th>區塊比例</th><td>平均、由上而下穩定掃視</td><td>頭重尾輕，焦點集中喺今日進度</td></tr>' +
+        '<tr><th>適用情境</th><td>待辦多、高頻、要逐項核對</td><td>待辦少、以今日決策為主、要極速新增</td></tr>' +
+        '<tr><th>共用（唔使揀）</th><td class="ok">色彩／字級／圓角／圓形 checkbox／功能範圍 ✓</td><td class="ok">色彩／字級／圓角／圓形 checkbox／功能範圍 ✓</td></tr>' +
+      '</tbody></table></div></div>' +
+
+    '<div class="sec"><div class="sec-head"><span class="kicker">04 / Side by Side</span><h2>兩款基礎變體首頁並排速覽</h2><p>同一組示範資料、同一組區塊編號，直接比較 D／E 嘅版面配置（F 見本頁最上方）。</p></div>' +
+      '<div class="grid-2">' + fusionMini('d') + fusionMini('e') + '</div></div>' +
+
+    fusionVariantHTML('d', 4) + fusionVariantHTML('e', 5) +
+
+    '<div class="sec card pad"><div class="sec-head" style="margin-bottom:10px"><span class="kicker">06 / Boundary</span><h2 style="font-size:19px">共用邊界</h2></div>' +
+      '<p style="font-size:14.5px;color:var(--c-muted);max-width:90ch">三個變體都只係「同一個頁面嘅唔同版面配置」：頁首、狀態導覽、排序／分類、待辦清單（含已完成置底）、主要 CTA，以及新增／編輯嘅標題、到期日、多選標籤、儲存／刪除／取消，全部沿用既有內容層級同功能範圍。F 拼接時兩張圖各自帶狀態導覽，保留上半部黑色分段、跳過下半部白色 pill，所以功能冇多冇少。呢個分區唔加入任何新頁面類型，亦唔寫 API、儲存、框架等技術實作細節；黃色虛線係版面標註，粉紅 ⟨⟩ 係可替換文案，綠色係觸控尺寸。</p></div>';
+}
+
+/* ============================================================
+   Mount + interactions
+   ============================================================ */
+const PANELS = { compare:'panel-compare', a:'panel-a', b:'panel-b', c:'panel-c', fusion:'panel-fusion' };
+
+function mount(){
+  document.getElementById('compare-cards').innerHTML = ['a','b','c'].map(styleCard).join('');
+  document.getElementById('compare-wireframes').innerHTML = ['a','b','c'].map(miniCard).join('');
+  ['a','b','c'].forEach(k => { document.getElementById(PANELS[k]).innerHTML = detailHTML(k); });
+  document.getElementById(PANELS.fusion).innerHTML = fusionPanelHTML();
+}
+
+function activate(key, focus){
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  Object.keys(PANELS).forEach(k => {
+    const panel = document.getElementById(PANELS[k]);
+    if (panel) panel.hidden = (k !== key);
+  });
+  tabs.forEach(t => {
+    const on = t.dataset.panel === PANELS[key];
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+    t.tabIndex = on ? 0 : -1;
+    if (on && focus) t.focus();
+  });
+  try { history.replaceState(null, '', '#' + PANELS[key]); } catch (e) { /* file:// may block */ }
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+/* 偏好：file:// 下 localStorage 有機會被擋，用 in-memory fallback */
+let pref = null;
+try { pref = localStorage.getItem('todo-theme-pref'); } catch (e) { pref = null; }
+function setPref(k){
+  pref = k;
+  try { localStorage.setItem('todo-theme-pref', k); } catch (e) { /* keep in memory */ }
+  renderPref(true);
+}
+function renderPref(showNotice){
+  document.querySelectorAll('.pick-btn').forEach(b => {
+    const on = b.dataset.pick === pref;
+    b.classList.toggle('is-picked', on);
+    b.innerHTML = I.star + (on ? '已揀選方案 ' + THEMES[b.dataset.pick].code : '揀呢個方案');
+  });
+  document.getElementById('pref-text').textContent = pref ? '目前偏好：方案 ' + THEMES[pref].code + ' · ' + THEMES[pref].name : '未揀選方案';
+  if (showNotice && pref) {
+    const n = document.getElementById('pick-notice');
+    n.hidden = false;
+    n.textContent = '已標記方案 ' + THEMES[pref].code + '（' + THEMES[pref].name + '）為偏好，只影響本頁顯示，唔會改動任何專案檔案。可以直接報方案代號俾我繼續落實。';
+  }
+}
+
+function bind(){
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => {
+      const key = Object.keys(PANELS).find(k => PANELS[k] === t.dataset.panel);
+      activate(key, false);
+    });
+    t.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      e.preventDefault();
+      const next = (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+      const key = Object.keys(PANELS).find(k => PANELS[k] === tabs[next].dataset.panel);
+      activate(key, true);
+    });
+  });
+
+  document.addEventListener('click', e => {
+    const view = e.target.closest('[data-view]');
+    if (view) { activate(view.dataset.view === 'compare' ? 'compare' : view.dataset.view, false); return; }
+    const pick = e.target.closest('[data-pick]');
+    if (pick) { setPref(pick.dataset.pick); return; }
+  });
+
+  const notesBtn = document.getElementById('notes-toggle');
+  notesBtn.addEventListener('click', () => {
+    const hidden = document.body.classList.toggle('hide-notes');
+    notesBtn.setAttribute('aria-pressed', String(!hidden));
+    document.getElementById('notes-text').textContent = hidden ? '顯示標註' : '隱藏標註';
+  });
+}
+
+mount();
+bind();
+renderPref(false);
+/* 支援直接以 #panel-b 之類開啟 */
+const hash = (location.hash || '').replace('#','');
+const hashKey = Object.keys(PANELS).find(k => PANELS[k] === hash);
+if (hashKey && hashKey !== 'compare') activate(hashKey, false);
+</script>
+</body>
+</html>
