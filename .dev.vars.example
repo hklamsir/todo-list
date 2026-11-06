@@ -1,0 +1,4 @@
+# 本地開發用（複製成 .dev.vars，唔要 commit）
+# publishable key 由 Supabase Dashboard → Project Settings → API 取得
+SUPABASE_URL="https://<project-ref>.supabase.co"
+SUPABASE_ANON_KEY="<publishable-key>"
