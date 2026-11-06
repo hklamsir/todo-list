@@ -2,7 +2,7 @@
 
 > 本檔只記錄「難以回頭、冇背景說明會令後人意外嘅決定」；純技術小決定（變數命名、CSS 細節）不記。
 > 本檔只答「點解咁決定」；做乜見 `spec.md`，點稱呼見 `glossary.md`。三份互不複述、無雙重真相。
-> 建立日期：2026-11-05　狀態：ADR-001～005 全部 Accepted（2026-11-05 設計共識，待實作）
+> 建立日期：2026-11-05（ADR-006：2026-11-06 實作階段）　狀態：ADR-001～006 全部 Accepted
 > 範圍收窄軌跡：full combo → 只做 Google ＋ 單表；三表 tags → `todos.tags TEXT` JSON array。呢兩次收窄係本檔最有價值嘅內容。
 > 改動傳播：改決策先改本檔（新增或改 Status），`spec.md` 只改引用編號、唔搬理由入去；改功能先改 spec；改用字先改 glossary。
 
@@ -100,3 +100,31 @@
   - `schema.sql` 只係現況快照，**變更歷史唯一真相喺 `migrations/`**；改 schema 唔好只改快照。
   - 本輪先一個 `docs:` commit 交付三份文件；code 階段 6 個 commit 接落去，兩者唔好撈埋。
   - 日後若 code 同 `spec.md` 不符，**改 code 遷就 spec**；要改 spec 必須先開新 ADR。
+
+---
+
+## ADR-006: 執行時注入 SRI 與 config（`run_worker_first`）＋ 四項實作期補充
+
+- **Status:** Accepted（2026-11-06 實作 v1 時）
+- **Context:** 落手實作時遇到五個 spec 未覆蓋、或條文之間互相拉扯嘅位：
+  1. spec §6.1 同時要求「SRI hash 執行時實計」同「code 同文件都唔准寫死任何 hash」，但靜態 HTML 嘅 `<script integrity>` 一定要有字面值——零 build 前提下兩者無法並存。被否決：① 靜態檔寫死 hash（違反條文，而且升 SDK 時會靜靜地過期）；② 寫假值或乾脆省略 `integrity`（安全假象，比冇更差）；③ 將 SDK 打包入 repo（要引入 bundler，違反 ADR-003 零 build）；④ 自己寫 PKCE 取代 SDK（ADR-003 已否決）。
+  2. 進度摘要要顯示**整體**完成率，但 `GET /api/todos` 受 `status` 篩選。被否決：① 前端每次切 tab 再開一個 `status=all` 請求（多一跳）；② 前端自行累加（篩選後根本冇完整資料，計出嚟係錯）。
+  3. `created_at` 用 `datetime('now')` 只有秒精度，同一秒建立兩條就只剩 UUID 排，次序隨機。被否決：① 改 DDL 用高精度時間（spec §4 係 DDL 唯一真相，改咗要重開 spec）；② 只喺前端補排（排序語意會前後端分裂）。
+  4. spec §3.2 同時要「inline 改標題」同完整編輯（`due_at`、`tags`），但 wireframe 只有一個編輯圖示。被否決：① 圖示只做 inline（改唔到到期日同標籤，實測即發現）；② 圖示只開完整編輯頁（失去 inline 改名，同 §3.2 不符）。
+  5. npm 10 arborist 解析 `vitest@4` ↔ `@cloudflare/vitest-pool-workers@0.23` 嘅 peer 依賴時直接拋 `Cannot read properties of null (reading 'edgesOut')`，`npm install` 失敗。被否決：① 逐個 `npm i` 手動釘版本（下次乾淨重裝又爆）；② 降 vitest 到 3.x（pool-workers 0.23 要求 `^4.1.0`）。
+
+- **Decision:**
+  - `wrangler.jsonc` 設 `assets.run_worker_first = true`；`GET /` 由 Worker 處理：fetch 釘版 SDK → `crypto.subtle.digest('SHA-384')` → 注入 `<script src integrity="sha384-…" crossorigin="anonymous" defer>`，同時注入 `window.__APP_CONFIG__`（`SUPABASE_URL` / `SUPABASE_ANON_KEY` 來自 env）同 per-request nonce 嘅 CSP。repo 內靜態檔**零 hash、零 key、零 SDK 版本字串**。
+  - `GET /api/todos` 回 `{data, meta:{tags, counts}}`；`counts` 係獨立 aggregate，唔受 `status` 影響；`{data:[...]}` 契約不變。
+  - 三個排序（`due` / `created` / `category`）一律加 `rowid DESC` 做 tie-breaker，**唔改** DDL。
+  - 列表編輯圖示 → 完整操作頁；點標題 → inline 改名。
+  - 專案加 `.npmrc` 設 `legacy-peer-deps=true`。
+- **Rationale:** 執行時注入係唯一同時滿足「SRI 真實驗證」＋「唔寫死 hash/key」＋「零 build」嘅做法，代價只係每個 isolate 首次請求多一次 CDN fetch（之後 cache）；`meta.counts` 用一條 aggregate 換走一次額外請求；`rowid` 係 SQLite 隱含單調遞增欄，唔動 schema 就有穩定次序；雙入口令 §3.2 兩種改法都真係可用；`.npmrc` 純屬工具鏈 workaround，唔影響 runtime。
+- **Consequences / 後人注意:**
+  - **不變量**：`public/` 任何檔案都唔可以出現 SRI hash、publishable key 或 SDK 版本字串；升 SDK 只改 `src/index.js` 嘅 `SDK_URL` 一處，hash 會自動重算，唔使「改版本 → 重算 integrity」兩步。
+  - CDN 抓唔到時 **fail closed**：唔注入標籤、`sdkReady=false`，登入掣 disable 並顯示訊息，唔會扮冇事。
+  - `run_worker_first: true` 令所有靜態請求都經過 Worker（資產仍由 `env.ASSETS.fetch` 直出）；日後加 `_headers` / `_redirects` 要記得 Worker 會先處理。
+  - `meta.counts` 只供 UI 摘要，**唔可以**當 data 渲染清單。
+  - `rowid` 係隱含欄：日後改 `WITHOUT ROWID` 表或重建表，tie-breaker 會失效，要改用高精度時間欄或單調 id。
+  - `.npmrc` 係 npm workaround，修好後可移除；移除前先確認乾淨 `node_modules` 下 `npm install` 成功。
+  - spec §7 第 4 條由「恰好 5 則」改為「恰好 6 則、ADR-001～006 連續」，改動同呢個 ADR 喺同一個 `docs:` commit。
