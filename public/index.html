@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FAF8F2">
+<meta name="description" content="個人待辦清單 — 一個畫面、一張清單。">
+<title>今日要做</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <div class="boot" id="boot" role="status" aria-live="polite">
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="sr-only">載入中…</span>
+  </div>
+
+  <!-- ===================== 登入 ===================== -->
+  <section id="login-view" class="view view--login" hidden>
+    <div class="login-card">
+      <div class="kicker">TO DO / PERSONAL</div>
+      <h1 class="display display--hero">今日要做</h1>
+      <p class="lede">一個畫面、一張清單。用 Google 登入就開始，唔使記密碼。</p>
+      <div class="band" aria-hidden="true"></div>
+
+      <div id="login-error" class="banner" hidden role="alert"></div>
+
+      <button id="login-btn" class="cta" type="button">
+        <span>以 Google 登入</span>
+        <span class="cta-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <p class="foot-note">登入只為分辨你嘅清單；資料只存你自己嘅 id 底下，其他人睇唔到。</p>
+    </div>
+  </section>
+
+  <!-- ===================== 主畫面 ===================== -->
+  <section id="app-view" class="view view--app" hidden>
+    <header class="head">
+      <div class="head-main">
+        <div class="kicker" id="head-kicker">TO DO</div>
+        <h1 class="display" id="head-title">今日要做</h1>
+        <p class="sub" id="head-sub">未完成 0 ／ 已完成 0</p>
+      </div>
+      <div class="ring" id="ring" role="img" aria-label="完成進度 0%">
+        <span id="ring-text">0/0</span>
+      </div>
+    </header>
+    <div class="band" aria-hidden="true"></div>
+
+    <nav class="seg" role="tablist" aria-label="狀態篩選">
+      <button type="button" role="tab" data-status="all" aria-selected="false">全部</button>
+      <button type="button" role="tab" data-status="active" aria-selected="true">未完成</button>
+      <button type="button" role="tab" data-status="completed" aria-selected="false">已完成</button>
+    </nav>
+
+    <div class="filters">
+      <div class="select">
+        <span>排序</span>
+        <div class="select-row">
+          <select id="sort-select" aria-label="排序方式">
+            <option value="due">到期日</option>
+            <option value="created">建立時間</option>
+            <option value="category">分類</option>
+          </select>
+          <span class="chev" aria-hidden="true">▾</span>
+        </div>
+      </div>
+      <div class="select">
+        <span>分類</span>
+        <div class="select-row">
+          <select id="tag-select" aria-label="分類篩選">
+            <option value="">全部</option>
+          </select>
+          <span class="chev" aria-hidden="true">▾</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="banner" class="banner" hidden role="alert"></div>
+
+    <ul id="list" class="list" aria-label="待辦清單"></ul>
+
+    <div id="empty" class="empty" hidden>
+      <div class="empty-mark" aria-hidden="true">✓</div>
+      <p class="empty-title" id="empty-title">清單好乾淨</p>
+      <p class="empty-hint" id="empty-hint">撳下面「新增待辦」開始。</p>
+    </div>
+
+    <div class="signout-row">
+      <button id="signout-btn" class="link-btn" type="button">登出</button>
+    </div>
+
+    <div class="cta-dock">
+      <button id="add-btn" class="cta" type="button">
+        <span>新增待辦</span>
+        <span class="cta-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ===================== 主要操作頁 ===================== -->
+  <section id="editor-view" class="view view--editor" hidden>
+    <form id="todo-form" class="editor-card" novalidate>
+      <div class="editor-head">
+        <button type="button" id="editor-back" class="back-btn" aria-label="返回清單">←</button>
+        <div class="editor-titles">
+          <div class="kicker">TODO / EDIT ENTRY</div>
+          <h1 class="display" id="editor-title">新增待辦</h1>
+        </div>
+      </div>
+      <div class="band" aria-hidden="true"></div>
+
+      <div id="editor-error" class="banner" hidden role="alert"></div>
+
+      <div class="panel">
+        <label class="field" for="f-title">
+          <span class="label">待辦標題 <em class="req">必填</em></span>
+          <input id="f-title" type="text" maxlength="200" autocomplete="off" enterkeyhint="done" placeholder="想做啲咩？">
+          <span class="hint" id="title-hint">1–200 字</span>
+        </label>
+
+        <label class="field" for="f-due">
+          <span class="label">到期日</span>
+          <span class="date-row">
+            <input id="f-due" type="date">
+            <button type="button" id="due-clear" class="chip-btn">清除</button>
+          </span>
+          <span class="hint" id="due-hint">可以留空 · 只用日期，唔計時區</span>
+        </label>
+      </div>
+
+      <div class="panel">
+        <div class="field">
+          <span class="label">分類標籤</span>
+          <div class="chips" id="tag-chips"></div>
+          <div class="tag-add">
+            <input id="f-tag" type="text" maxlength="30" autocomplete="off" placeholder="輸入新標籤…">
+            <button type="button" id="tag-add" class="chip-btn">加入</button>
+          </div>
+          <span class="hint">最多 10 個 · 每個 1–30 字 · 自動去重</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" id="save-btn" class="cta">
+          <span>儲存</span>
+          <span class="cta-arrow" aria-hidden="true">→</span>
+        </button>
+        <div class="row">
+          <button type="button" id="delete-btn" class="btn btn--danger">刪除待辦</button>
+          <button type="button" id="cancel-btn" class="btn">取消</button>
+        </div>
+      </div>
+
+      <p class="note">儲存後會重新載入清單；已完成嘅項目一律排到最底。</p>
+    </form>
+  </section>
+
+</div>
+<!--APP_BOOTSTRAP-->
+<script type="module" src="/app.js"></script>
+</body>
+</html>
