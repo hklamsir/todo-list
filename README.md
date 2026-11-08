@@ -57,6 +57,10 @@ npm test          # vitest + @cloudflare/vitest-pool-workers
 - 整合測試用真的 D1（`applyD1Migrations`）與真的簽名驗證：金鑰在 `vitest.config.js` 由 Node 生成，公開 JWK 用 miniflare `outboundService` 當 JWKS 回應，私鑰以 binding 傳入 workerd。沒有任何 mocking 庫、沒有假 token。
 - 覆蓋：401 各種情境（缺 token／偽造／過期／issuer 不符／aud 陣列）、CRUD、ownership 讀改刪三路徑、已完成置底、三種排序、tag 篩選、SQL 注入字串、壞 JSON、錯誤 body 欄位。
 
+## CI / CD
+
+`main` 由 Cloudflare Workers Builds 部署：Build command 留空、Deploy command `npx wrangler deploy`、Root directory `/`。本機手動部署用 `npm run deploy`。
+
 ## 部署 checklist（由你親自執行）
 
 1. `npx wrangler d1 create todo-db` → 把回傳的 `database_id` 貼入 `wrangler.jsonc`（現時是全 0 佔位）
