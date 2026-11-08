@@ -20,21 +20,61 @@
 
   <!-- ===================== 登入 ===================== -->
   <section id="login-view" class="view view--login" hidden>
-    <div class="login-card">
-      <div class="kicker">TO DO / PERSONAL</div>
-      <h1 class="display display--hero">今日要做</h1>
-      <p class="lede">一個畫面、一張清單。用 Google 登入就開始，唔使記密碼。</p>
-      <div class="band" aria-hidden="true"></div>
+    <div class="login-shell">
+      <div class="login-top">
+        <div class="login-brand">
+          <div class="kicker">TO DO / PERSONAL</div>
+          <h1 class="display display--hero">今日要做</h1>
+          <p class="lede">一個畫面、一張清單。<br>用 Google 登入就開始，唔使記密碼。</p>
+        </div>
+        <div class="band" aria-hidden="true"></div>
 
-      <div id="login-error" class="banner" hidden role="alert"></div>
+        <!-- 純 CSS 清單插畫：撐起上半部版面，呼應主畫面嘅 checklist -->
+        <div class="login-art" aria-hidden="true">
+          <div class="art-card">
+            <div class="art-row">
+              <span class="art-box art-box--done">✓</span>
+              <span class="art-line art-line--done art-w-2"></span>
+            </div>
+            <div class="art-row">
+              <span class="art-box"></span>
+              <span class="art-line art-w-3"></span>
+            </div>
+            <div class="art-row">
+              <span class="art-box"></span>
+              <span class="art-line art-w-2"></span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <button id="login-btn" class="cta" type="button">
-        <span>以 Google 登入</span>
-        <span class="cta-arrow" aria-hidden="true">→</span>
-      </button>
+      <div class="login-action">
+        <div class="login-card-kicker">SIGN IN / GOOGLE</div>
+        <h2 class="login-card-title">登入你嘅清單</h2>
+        <p class="login-card-sub">一個掣，之後每次都返到同一張清單。</p>
 
-      <p class="foot-note">登入只為分辨你嘅清單；資料只存你自己嘅 id 底下，其他人睇唔到。</p>
+        <div id="login-error" class="banner" hidden role="alert"></div>
+
+        <button id="login-btn" class="cta cta--google" type="button">
+          <span class="g-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.6 2.8c2.2-2 3.8-5 3.8-8.5z"/>
+              <path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.5 1.2-4 1.2-3.1 0-5.8-2.1-6.7-5L1.4 17.3C3.4 21.3 7.4 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.3 14.3c-.2-.7-.4-1.5-.4-2.3s.1-1.6.4-2.3L1.4 6.7C.5 8.5 0 10.2 0 12s.5 3.5 1.4 5.3l3.9-3z"/>
+              <path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.4-3.3C17.9 1 15.2 0 12 0 7.4 0 3.4 2.7 1.4 6.7l3.9 3C6.2 6.8 8.9 4.7 12 4.7z"/>
+            </svg>
+          </span>
+          <span>以 Google 登入</span>
+          <span class="cta-arrow" aria-hidden="true">→</span>
+        </button>
+
+        <p class="foot-note">登入只為分辨你嘅清單；資料只存你自己嘅 id 底下，其他人睇唔到。</p>
+      </div>
     </div>
+
+    <footer class="login-footer">
+      © 2026 林 Sir 設計 ・ 由 WorkBuddy 建置、Cloudflare 託管、Supabase 提供認證
+    </footer>
   </section>
 
   <!-- ===================== 主畫面 ===================== -->
