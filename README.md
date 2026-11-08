@@ -28,10 +28,10 @@ src/
 public/
   index.html        三個 view：#boot / #login-view / #app-view / #editor-view
   styles.css        Theme F：13px 頁首卡、黑色分段導覽、11px 項目卡、圓形 checkbox
-  app.js            狀態、渲染、inline 改名、編輯器、語音接線
-  lib/              純函數（format / state / voice）＋ API 客戶端（401 自動刷新重試一次）
+  app.js            狀態、渲染、inline 改名、編輯器、語音接線、上一頁守衛
+  lib/              純函數（format / state / voice / nav）＋ API 客戶端（401 自動刷新重試一次）
 test/
-  unit/             驗證層、SQL 白名單、前端純函數（80 條）
+  unit/             驗證層、SQL 白名單、前端純函數（100 條）
   integration/      真 D1 + 真 ES256 簽名（34 條）
 migrations/
   0001_create_todos.sql

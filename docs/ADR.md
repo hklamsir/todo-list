@@ -2,7 +2,7 @@
 
 > 本檔只記錄「難以回頭、冇背景說明會令後人意外嘅決定」；純技術小決定（變數命名、CSS 細節）不記。
 > 本檔只答「點解咁決定」；做乜見 `spec.md`，點稱呼見 `glossary.md`。三份互不複述、無雙重真相。
-> 建立日期：2026-11-05（ADR-006：2026-11-06、ADR-007：2026-11-08）　狀態：ADR-001～007 全部 Accepted
+> 建立日期：2026-11-05（ADR-006：2026-11-06、ADR-007：2026-11-08、ADR-008：2026-11-08）　狀態：ADR-001～008 全部 Accepted
 > 範圍收窄軌跡：full combo → 只做 Google ＋ 單表；三表 tags → `todos.tags TEXT` JSON array。呢兩次收窄係本檔最有價值嘅內容。
 > 改動傳播：改決策先改本檔（新增或改 Status），`spec.md` 只改引用編號、唔搬理由入去；改功能先改 spec；改用字先改 glossary。
 
@@ -152,3 +152,27 @@
   - 改 `Permissions-Policy` 只放寬 microphone，**唔好**順手開 camera / geolocation。
   - iOS 上嘅 Chrome / Edge 用 WebKit 但唔暴露 `SpeechRecognition`，feature detect 會自然隱藏；iOS Safari 14.5+ 有，但每次要 user gesture。
   - 日後若要提升準確度，走 Cloud STT 要**先開新 ADR**（新端點、secret、成本、音頻處理邊界全部要重寫）。
+
+---
+
+## ADR-008: 上一頁用 History API 分層紀錄 —— 編輯器獨立一筆、清單頁留守衛、連撳兩下才離開
+
+- **Status:** Accepted（2026-11-08，spec §6.2）
+- **Context:** 三個視圖（登入／清單／編輯器）只用 `hidden` 切換，由頭到尾冇寫過任何 `history` 紀錄。喺 Android 實體返回鍵或桌面 Back 一撳，瀏覽器冇「app 內」嘅紀錄可退，就直接卸載文件 —— 用戶睇落就係「直接跳出 app」，而且喺新增／編輯頁填到一半都一樣，成套輸入白費。被否決嘅替代方案：① **改 hash route**（`#/new`、`#/edit/:id`）：URL 會殘留，重新載入會落返一個冇 auth guard 嘅深層連結，而未儲存草稿本身唔可以靠 URL 還原，得物無所用；② **`beforeunload` 攔返回**：對瀏覽器 Back 唔可靠（Android Chrome 多數唔問），而且會出「離開此網站？」呢個嚇人嘅系統對話框；③ **改真多頁**：每次切視圖都要重新載入 SDK 同驗 session，違反 spec §6.2「唔跳頁」；④ **只做編輯器嗰筆、清單頁照舊直接離開**：解決唔到用戶回報嘅症狀。
+- **Decision:**
+  - `history.state` 寫 `{ todoView: 'app' | 'editor' | 'login', todoId? }`；**URL 一律保持 `/`**（三個視圖係同一份文件，唔偽造深層連結）。
+  - 進入清單頁：`replaceState(app)` 標記當前紀錄，再 `pushState(app)` 留一筆**守衛紀錄**。有守衛，返回鍵才會先觸發 `popstate` 而唔係直接卸載文件。
+  - 開編輯器：`pushState(editor, { todoId })`。上一頁 = 關編輯器（只切視圖，唔再 push、唔出離開提示）。
+  - 喺清單頁按返回：第一下攔住並補回守衛，出「再撳一次『返回』離開」提示（2 秒內有效）；第二下才 `history.back()` 真正放行。
+  - UI 上嘅「←」「取消」「儲存」關編輯器時，主動 `history.back()`，並用 600ms 時間窗（`suppressUntil`）吞掉隨之而來嘅 `popstate`，令歷史唔會殘留一筆「其實已經關咗」嘅編輯器紀錄。
+  - 登入頁唔攔返回（離開係正常行為），並重置守衛狀態。
+  - 純邏輯（白名單讀 state、守衛狀態機）放 `public/lib/nav.js`，`history` / DOM 接線留 `public/app.js`。
+- **Rationale:** History API 係唯一可以令「上一頁」有 app 內語意而又唔改 URL、唔重新載入文件嘅方法。守衛紀錄借用「同文件多一筆」呢個特性，把必然會卸載嘅返回動作變成一個可以觀察嘅 `popstate`，於是「攔一次、講清楚、再放行」可以純前端做到，唔需要 `beforeunload` 那種嚇人對話框。連撳兩下嘅窗口設 2 秒：足夠讓人讀完七個字嘅提示，又短到唔會變成「永遠走唔到」。
+- **Consequences / 後人注意:**
+  - **不變量一**：`pushState` 一定要有對應嘅「退出歷史」路徑。任何關編輯器嘅新入口（快捷鍵、手勢、日後嘅 modal）都必須經 `closeEditor()`，否則歷史多一筆孤兒紀錄，之後按上一頁會重開一個空編輯器。
+  - **不變量二**：`editorEntry` 必須有兩個地方歸零 —— 程式關（`closeEditor()`）同瀏覽器關（`closeEditor({ fromHistory: true })`）。漏咗前者會亂 `back()` 直接離開頁面；漏咗後者會喺已經退到清單之後再 back 一次。
+  - 吞 `popstate` 用**時間窗**而唔用計數器：`history.back()` 有時唔會產生 `popstate`（已經喺第一筆），計數器會殘留並吞掉下一次真正嘅返回。
+  - 單筆 history 嘅分頁（主畫面捷徑直開、`history.length === 1`）第二下 `history.back()` 可能係 no-op，交由瀏覽器處理（Android Chrome 會關分頁／返上一個 app）。**唔好**加 `location.replace('about:blank')` 之類 fallback，會令用戶真係走唔到。
+  - 唔好喺 `popstate` handler 內「push 完即刻 `back()`」，兩邊會互拉；要放行就直接 `back()`，要攔就只 push。
+  - 日後若真要深層連結，要**先開新 ADR** 改走 hash route，並為每個深層連結補 auth guard（本 app 冇 guest、冇 401 fallback page）。
+  - 已用 Playwright 實測五個情境（編輯器按上一頁、清單第一下、2.4 秒後失效、儲存後上一頁、UI ← 之後再上一頁），全部符合預期，見 `.qa/back-*.png`。

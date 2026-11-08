@@ -108,6 +108,8 @@ CREATE INDEX IF NOT EXISTS idx_todos_user_done ON todos(user_id, is_done);
 
 **6.2 UX** — 一個「以 Google 登入」掣；單頁用 `hidden` 切 `#login-view` / `#app-view`，唔跳頁；`<input type="date">`、今日／逾期提示、狀態 tab、分類下拉、`localStorage` 排序偏好、已完成置底。`*.html` 會被 Cloudflare html_handling 做 307，所有 OAuth redirect 同連結一律 `origin + '/'`。每次 `getSession()` 重拎 token 避免 refresh 後用舊值，`SIGNED_OUT` 回登入頁。
 
+**上一頁／返回鍵** — 編輯器獨立一筆歷史紀錄，上一頁等於關編輯器（唔出提示）；清單頁留守衛紀錄，連撳兩下（2 秒內）才真正離開，第一下出「再撳一次『返回』離開」提示；登入頁唔攔。URL 一律保持 `/`，唔做深層連結。見 ADR-008。
+
 **6.3 部署設定**
 
 | 設定 | 值 |
