@@ -2,7 +2,7 @@
 
 > 本檔只記錄「難以回頭、冇背景說明會令後人意外嘅決定」；純技術小決定（變數命名、CSS 細節）不記。
 > 本檔只答「點解咁決定」；做乜見 `spec.md`，點稱呼見 `glossary.md`。三份互不複述、無雙重真相。
-> 建立日期：2026-11-05（ADR-006：2026-11-06 實作階段）　狀態：ADR-001～006 全部 Accepted
+> 建立日期：2026-11-05（ADR-006：2026-11-06、ADR-007：2026-11-08）　狀態：ADR-001～007 全部 Accepted
 > 範圍收窄軌跡：full combo → 只做 Google ＋ 單表；三表 tags → `todos.tags TEXT` JSON array。呢兩次收窄係本檔最有價值嘅內容。
 > 改動傳播：改決策先改本檔（新增或改 Status），`spec.md` 只改引用編號、唔搬理由入去；改功能先改 spec；改用字先改 glossary。
 
@@ -128,3 +128,25 @@
   - `rowid` 係隱含欄：日後改 `WITHOUT ROWID` 表或重建表，tie-breaker 會失效，要改用高精度時間欄或單調 id。
   - `.npmrc` 係 npm workaround，修好後可移除；移除前先確認乾淨 `node_modules` 下 `npm install` 成功。
   - spec §7 第 4 條由「恰好 5 則」改為「恰好 6 則、ADR-001～006 連續」，改動同呢個 ADR 喺同一個 `docs:` commit。
+
+---
+
+## ADR-007: 標題語音輸入用瀏覽器原生 Web Speech API、漸進增強、不自動儲存
+
+- **Status:** Accepted（2026-11-08，spec 1.1 §3.7）
+- **Context:** 用戶要求喺「待辦標題」輸入框加語音輸入。被否決嘅替代方案：① **Google Cloud STT v2 經 Worker 代理**（準確度最高、可加自訂詞彙 boost `EC` / `ADR` / `Supabase`，但要新增端點 + secret + US$0.016/分鐘，同「一個畫面、一張表」嘅極簡目標相反）；② 第三方語音 SDK（多一個 CDN 依賴，要再做一次釘版 + SRI + CSP）；③ 只在 Chrome 顯示、其他瀏覽器顯示壞掣（違反漸進增強，Firefox 預設關閉 `SpeechRecognition`）；④ 語音結果直接寫入 DB（粵語辨識錯字會直接污染資料，改都改唔返）。另一條「唔使寫 code」嘅路線（OS 聽寫 Win+H／iOS 鍵盤）保留做日常替代，但唔可以由 app 控制語言同錯誤提示。
+- **Decision:**
+  - 用 `window.SpeechRecognition || window.webkitSpeechRecognition`，**feature detect 到才顯示**麥克風掣；冇就完全唔出現。
+  - push-to-talk：撳一下開始、再撳一下停止；`continuous=false`、`interimResults=true`、`lang` 預設 `zh-HK`，可切 `zh-CN` / `en-US`。
+  - 轉寫只**插入游標位置**、保留原有文字、超過 200 字截斷；草稿即時可見，但**要用戶按「儲存」才寫入 DB**。
+  - 錯誤（`not-allowed` / `no-speech` / `network` / `audio-capture` / `aborted`）統一映射成中文提示，表單唔中斷。
+  - Worker 嘅 `Permissions-Policy` 由 `microphone=()` 放寬到 `microphone=(self)`，其餘（相機、定位）維持封鎖。
+  - 實作拆兩層：`public/lib/voice.js`（純邏輯：插入、截斷、錯誤映射、狀態機，可單元測試）＋ `public/app.js`（DOM 接線）。見 `spec.md` §3.7。
+- **Rationale:** 零成本、零後端、零 build 影響；音頻由瀏覽器廠商處理，Worker 唔會接觸音頻，隱私邊界最清楚；不自動儲存令辨識錯誤永遠有得改。相對 Cloud STT，v1.1 用唔著為準確度付後端複雜度——粵語短句 + 用戶自己校對，已經夠用。
+- **Consequences / 後人注意:**
+  - **不變量**：語音純屬輸入輔助，鍵盤永遠可用；冇 API 就唔顯示掣，**唔可以**出現 disabled 嘅壞掣。`voice.js` 唔可以 import DOM，否則測唔到。
+  - Chrome 嘅 `continuous` 有已知缺陷：靜音 5–10 秒或連續約 30 秒會自動 `onend`。本設計係單句模式，斷線即回 idle，**唔做自動重連**（避免無限重試燒網絡同電）。
+  - `zh-HK` 出書面語，而且中英夾雜（`EC`、`ADR`、`Supabase`、`PS Training`）幾乎必錯；呢個係「唔自動儲存」嘅第二個理由，唔好改。
+  - 改 `Permissions-Policy` 只放寬 microphone，**唔好**順手開 camera / geolocation。
+  - iOS 上嘅 Chrome / Edge 用 WebKit 但唔暴露 `SpeechRecognition`，feature detect 會自然隱藏；iOS Safari 14.5+ 有，但每次要 user gesture。
+  - 日後若要提升準確度，走 Cloud STT 要**先開新 ADR**（新端點、secret、成本、音頻處理邊界全部要重寫）。

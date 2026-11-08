@@ -1,6 +1,6 @@
 # Todo List — 產品與技術規格書（Spec）
 
-**版本**：1.0（設計共識，v1 已實作）　**最後更新**：2026-11-06　**語言**：繁體中文　**狀態**：設計已定稿；第 7 章係文件交付驗收，code 實作見 `README.md` 同 ADR-006
+**版本**：1.1（v1 已實作；1.1 加 §3.7 語音輸入）　**最後更新**：2026-11-08　**語言**：繁體中文　**狀態**：設計已定稿；第 7 章係文件交付驗收，code 實作見 `README.md`、ADR-006、ADR-007
 
 > 本檔只答「做乜」；決策理由見 `ADR.md`，術語定義見 `glossary.md`。三份各自獨立、僅交叉引用，互不複述。
 > 改動傳播：改功能先改本檔 → 睇要唔要加／修 ADR → 對返 glossary 用字；改決策先改 ADR，本檔只改引用編號；改用字先改 glossary，再同步三份。
@@ -57,6 +57,15 @@
 | `tag` | 任意字串 | 唔係欄名，格式校驗後 `.bind()` |
 
 **3.6 ownership** — 每條 SQL 都帶 `WHERE ... AND user_id = ?`，`user_id` 一律取 JWT `sub`，**完全忽略 body 挾帶嘅 `user_id`**；`UPDATE` / `DELETE` 用 `meta.changes === 0` 判定 404，唔先 SELECT 再改（ADR-004）。
+
+**3.7 語音輸入（v1.1）** — 主要操作頁嘅「待辦標題」可以選擇用語音輸入（ADR-007）：
+
+- 只喺瀏覽器提供 `SpeechRecognition` / `webkitSpeechRecognition` 時顯示麥克風掣；唔支援就唔顯示，鍵盤照常可用，**唔會出現 disabled 壞掣**。
+- 撳一下開始、再撳一下停止；`continuous=false`、`interimResults=true`，`lang` 預設 `zh-HK`，可切 `zh-CN` / `en-US`。
+- 轉寫結果**插入游標位置**、保留原有文字、超過 200 字即截斷；草稿即時顯示，但**唔會自動儲存**，要用戶自己按「儲存」。
+- 錯誤（權限被拒／聽唔到／無網絡／無麥克風）一律轉成中文提示，表單唔會中斷。
+- 音頻由瀏覽器廠商處理（Chrome→Google、Edge→Azure、Safari→Apple），本 app 唔接收、唔儲存音頻；Worker 只係放寬 `Permissions-Policy` 至 `microphone=(self)`。
+- 對應檔案：`public/lib/voice.js`（插入／錯誤映射／狀態機）、`public/app.js`（按鈕與接線）。
 
 ## 4. 資料模型（D1 / SQLite）
 
@@ -119,7 +128,7 @@ production secrets、Supabase dashboard 同 prod deploy 由用戶親自執行；
 1. 三份檔喺 `docs/`，檔名精確係 `spec.md` / `ADR.md` / `glossary.md`。
 2. 本檔恰好 7 章、120–160 行；無 Change Log、無使用者角色章、無名詞表、無 ADR 摘要章、無附錄。
 3. 本檔檔頭有 `**語言**：繁體中文`；§4 有完整定稿 DDL；§5 有 4 列 API 表；§6 有設定表。
-4. `ADR.md` 恰好 6 則、ADR-001～006 連續；每則齊 5 欄；Context 有寫被否決方案同兩次範圍收窄。
+4. `ADR.md` 恰好 7 則、ADR-001～007 連續；每則齊 5 欄；Context 有寫被否決方案同兩次範圍收窄。
 5. `glossary.md` 三章 + 禁用詞表、四欄表頭、44 詞條，每詞備註有 ADR 編號。
 6. 無雙重真相：DDL 只喺本檔、ADR 狀態欄只喺 `ADR.md`、詞條表只喺 `glossary.md`。
 7. 所有交叉引用解析得到：本檔嘅 ADR 編號、ADR 嘅章節號、glossary 備註嘅 ADR 編號全部有效。
