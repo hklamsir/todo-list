@@ -1,5 +1,6 @@
 import { createApi } from './lib/api.js';
 import { formatDue, tagUnion, todayISO } from './lib/format.js';
+import { EXIT_HINT, NAV, createExitGuard, navState, readTodoId, readView } from './lib/nav.js';
 import { buildQuery, loadPrefs, savePrefs } from './lib/state.js';
 import { DEFAULT_LANG, VOICE_LANGS, createVoiceInput, getSpeechCtor, hasAudioInput, insertTranscript, isMicrophoneAllowed, mapVoiceError } from './lib/voice.js';
 
@@ -59,6 +60,7 @@ const el = {
   saveBtn: $('save-btn'),
   deleteBtn: $('delete-btn'),
   cancelBtn: $('cancel-btn'),
+  toast: $('toast'),
 };
 
 const state = {
@@ -174,19 +176,120 @@ function show(view) {
 
 function showLogin(message) {
   state.inApp = false;
+  resetNav();
+  hideToast();
   show('login');
   if (el.login) el.login.hidden = false;
   el.loginError.hidden = !message;
   el.loginError.textContent = message || '';
   el.loginBtn.disabled = Boolean(cfg.configError) || !cfg.sdkReady;
+  // 登入頁唔攔上一頁：離開係正常行為，唔應該出「再撳一次」提示
+  writeNavState(NAV.login, { replace: true });
 }
 
 async function enterApp() {
   if (state.inApp) return;
   state.inApp = true;
   show('app');
+  armAppHistory();
   el.kicker.textContent = `TO DO / ${String(new Date().getDate()).padStart(2, '0')} ${MONTHS[new Date().getMonth()]}`;
   await refresh();
+}
+
+/* ---------------- 瀏覽器上一頁（ADR-008） ----------------
+ * 三個視圖共用同一份文件，所以「上一頁」本身冇任何 app 內紀錄可退。
+ * 對策：清單頁永遠留一筆「守衛」紀錄，令 Android 返回鍵先觸發 popstate，
+ * 而唔係直接卸載文件；撳夠兩下（2 秒內）才真正離開。
+ */
+
+const exitGuard = createExitGuard();
+const TOAST_MS = 2200;
+
+let navArmed = false; // 清單頁是否已寫入 history
+let editorEntry = false; // history 頂部是否編輯器那一筆
+let suppressUntil = 0; // 自己觸發的 back() 引來嘅 popstate，要吞掉
+let toastTimer = 0;
+
+function writeNavState(view, { replace = false, todoId = null } = {}) {
+  try {
+    const url = window.location.href;
+    if (replace) window.history.replaceState(navState(view, todoId), '', url);
+    else window.history.pushState(navState(view, todoId), '', url);
+    return true;
+  } catch {
+    // 私隱模式或沙盒可能拋錯：app 照用，只係冇上一頁導航
+    return false;
+  }
+}
+
+/** 清單頁同時做「根」同「有後繼」：先標記當前紀錄，再 push 一筆守衛。 */
+function armAppHistory() {
+  if (navArmed) return;
+  writeNavState(NAV.app, { replace: true });
+  writeNavState(NAV.app);
+  navArmed = true;
+}
+
+function resetNav() {
+  navArmed = false;
+  editorEntry = false;
+  exitGuard.reset();
+}
+
+function showToast(message) {
+  if (!el.toast) return;
+  el.toast.textContent = message;
+  el.toast.classList.add('is-visible');
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(hideToast, TOAST_MS);
+}
+
+function hideToast() {
+  window.clearTimeout(toastTimer);
+  el.toast?.classList.remove('is-visible');
+}
+
+/**
+ * 處理上一頁／下一頁。原則：
+ * 1. 由編輯器返回 → 只切視圖，唔再 push，唔好出離開提示
+ * 2. 喺清單頁按返回 → 第一下攔住並重新武裝，第二下（2 秒內）才放行
+ * 3. 登入頁 → 完全唔干預
+ */
+function onPopState(event) {
+  if (Date.now() < suppressUntil) {
+    // 自己 back() 引起的：視圖已經同步好，直接吞掉
+    suppressUntil = 0;
+    return;
+  }
+
+  if (!state.inApp) return;
+
+  const view = readView(event.state);
+
+  if (view === NAV.editor) {
+    const id = readTodoId(event.state);
+    const todo = id ? findTodo(id) : null;
+    // 已經喺同一個編輯器就唔重設表單，免得洗掉未儲存的輸入
+    if (el.editor.hidden || state.editingId !== (todo?.id ?? null)) openEditor(todo, { fromHistory: true });
+    editorEntry = true;
+    return;
+  }
+
+  if (!el.editor.hidden) {
+    closeEditor({ fromHistory: true });
+    return;
+  }
+
+  if (exitGuard.press(Date.now())) {
+    // 第二下：放行，交由瀏覽器離開（上一頁存在就跳，第一筆就交返瀏覽器處理）
+    suppressUntil = 0;
+    window.history.back();
+    return;
+  }
+
+  // 第一下：補返一筆守衛（阻止文件被卸載），同時講清楚要撳多一次
+  writeNavState(NAV.app);
+  showToast(EXIT_HINT);
 }
 
 /* ---------------- 資料 ---------------- */
@@ -452,7 +555,7 @@ function startInlineEdit(li, todo) {
 
 /* ---------------- 編輯器 ---------------- */
 
-function openEditor(todo) {
+function openEditor(todo, { fromHistory = false } = {}) {
   voice.stop();
   refreshMicState().then(renderVoiceAvailability);
   state.editingId = todo ? todo.id : null;
@@ -470,14 +573,34 @@ function openEditor(todo) {
   renderTagChips();
 
   show('editor');
+  hideToast();
+  // 由上一頁／下一頁返到編輯器時，當前紀錄已經係編輯器一筆，唔可以再 push
+  editorEntry = true;
+  if (!fromHistory) writeNavState(NAV.editor, { todoId: state.editingId });
   el.fTitle.focus();
 }
 
-function closeEditor() {
+function closeEditor({ fromHistory = false } = {}) {
+  if (el.editor.hidden) return;
   voice.stop();
   state.editingId = null;
   state.editTags = [];
   show('app');
+
+  if (fromHistory) {
+    // 已經由瀏覽器退返清單，當前紀錄就係清單一筆
+    editorEntry = false;
+    return;
+  }
+  if (!editorEntry) return; // 冇 push 過就唔好亂 back()，否則會直接離開頁面
+
+  editorEntry = false;
+  suppressUntil = Date.now() + 600;
+  try {
+    window.history.back();
+  } catch {
+    suppressUntil = 0;
+  }
 }
 
 function renderTagChips() {
@@ -658,8 +781,11 @@ function bindEvents() {
   });
 
   el.addBtn.addEventListener('click', () => openEditor(null));
-  el.back.addEventListener('click', closeEditor);
-  el.cancelBtn.addEventListener('click', closeEditor);
+  el.back.addEventListener('click', () => closeEditor());
+  el.cancelBtn.addEventListener('click', () => closeEditor());
+
+  // Android 實體返回鍵／手勢、桌面 Back 都經呢條路
+  window.addEventListener('popstate', onPopState);
 
   el.form.addEventListener('submit', submitEditor);
   el.deleteBtn.addEventListener('click', deleteEditing);

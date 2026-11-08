@@ -1020,6 +1020,36 @@ input, select, button { font-family: inherit; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ---------------- 暫時提示（上一頁守衛，ADR-008） ---------------- */
+
+/* 浮喺底部 CTA 之上；透明時完全唔接滑鼠事件，唔會擋住任何操作 */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  max-width: min(360px, calc(100vw - 40px));
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: .01em;
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(17, 17, 17, .22);
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  transition: opacity 180ms ease, transform 180ms ease;
+  pointer-events: none;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 /* ---------------- 桌面 / 平板 ---------------- */
 
 @media (min-width: 720px) {
