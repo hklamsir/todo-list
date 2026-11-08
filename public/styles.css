@@ -801,12 +801,64 @@ input, select, button { font-family: inherit; }
     padding: 24px 0;
   }
 
+  /* 固定高度：切 tab／開編輯器時卡片不會忽高忽低；內容多就喺內部滾動 */
   .app {
     background: var(--bg);
-    min-height: auto;
+    height: min(880px, calc(100dvh - 48px));
+    min-height: 0;
+    overflow: hidden;
     border-radius: 18px;
     box-shadow: 0 0 0 1px var(--line), 0 30px 70px rgba(17, 17, 17, .12);
     padding-bottom: 0;
+  }
+
+  .view { min-height: 0; }
+
+  /* 清單佔滿中間，自己滾動；CTA 貼底 */
+  .list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;
+    /* 底部淡出：提示仲有內容，避免項目被硬切一半 */
+    -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 18px), transparent 100%);
+    mask-image: linear-gradient(180deg, #000 calc(100% - 18px), transparent 100%);
+  }
+
+  /* Chromium / Edge：固定顯示 8px 幼滾動條（設了 scrollbar-width 會令 webkit 規則失效） */
+  .list::-webkit-scrollbar { width: 8px; }
+  .list::-webkit-scrollbar-track { background: transparent; }
+  .list::-webkit-scrollbar-thumb {
+    background: #DDD8C8;
+    border-radius: 99px;
+    border: 2px solid var(--bg);
+  }
+  .list::-webkit-scrollbar-thumb:hover { background: var(--line-strong); }
+
+  .list:empty {
+    flex: 0 0 0;
+    margin: 0;
+  }
+
+  .empty {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .view--editor {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* 表單喺固定高度卡片內垂直居中；用 auto margin 而唔用 justify-content，
+     內容超高時 auto margin 會變 0，唔會切走頂部（flex 置中的經典陷阱）。 */
+  .view--editor .editor-card {
+    margin-top: auto;
+    margin-bottom: auto;
   }
 
   .cta-dock { position: static; }
