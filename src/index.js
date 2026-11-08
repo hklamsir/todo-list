@@ -185,7 +185,7 @@ function withSecurityHeaders(response) {
   headers.set('x-content-type-options', 'nosniff');
   headers.set('referrer-policy', 'same-origin');
   headers.set('x-frame-options', 'DENY');
-  headers.set('permissions-policy', 'geolocation=(), microphone=(), camera=()');
+  headers.set('permissions-policy', 'geolocation=(), microphone=(self), camera=()');
 
   return new Response(response.body, {
     status: response.status,

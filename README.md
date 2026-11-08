@@ -1,6 +1,6 @@
 # Todo List · v1
 
-個人待辦清單。一個畫面、一張表、一次 deploy。設計依據 `docs/spec.md` v1.0，視覺用 `todo-theme-proposals.html` 的**方案 F（Split Hybrid）**。
+個人待辦清單。一個畫面、一張表、一次 deploy。設計依據 `docs/spec.md` v1.1，視覺用 `todo-theme-proposals.html` 的**方案 F（Split Hybrid）**。
 
 ## 架構一覽
 
@@ -10,6 +10,7 @@
 | 邊緣 | Cloudflare Workers + Static Assets（`assets.binding = ASSETS`、`API_BASE = ''`） |
 | 資料 | D1 單表 `todos`，`tags` 以 TEXT 存 JSON array |
 | 認證 | Supabase Auth（Google、PKCE），`jose` + JWKS 驗 ES256，Worker 無狀態，只信 `sub` |
+| 語音 | 瀏覽器原生 Web Speech API，feature detect 到才顯示麥克風；音頻不經本 app（ADR-007） |
 | 日誌 | 結構化 JSON（`level / event / requestId / status / durationMs`），不記錄 token 與標題內容 |
 
 ```
@@ -25,10 +26,10 @@ src/
 public/
   index.html        三個 view：#boot / #login-view / #app-view / #editor-view
   styles.css        Theme F：13px 頁首卡、黑色分段導覽、11px 項目卡、圓形 checkbox
-  app.js            狀態、渲染、inline 改名、編輯器
-  lib/              純函數（format / state）＋ API 客戶端（401 自動刷新重試一次）
+  app.js            狀態、渲染、inline 改名、編輯器、語音接線
+  lib/              純函數（format / state / voice）＋ API 客戶端（401 自動刷新重試一次）
 test/
-  unit/             驗證層、SQL 白名單、前端純函數（53 條）
+  unit/             驗證層、SQL 白名單、前端純函數（80 條）
   integration/      真 D1 + 真 ES256 簽名（34 條）
 migrations/
   0001_create_todos.sql

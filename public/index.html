@@ -117,11 +117,23 @@
       <div id="editor-error" class="banner" hidden role="alert"></div>
 
       <div class="panel">
-        <label class="field" for="f-title">
-          <span class="label">待辦標題 <em class="req">必填</em></span>
-          <input id="f-title" type="text" maxlength="200" autocomplete="off" enterkeyhint="done" placeholder="想做啲咩？">
-          <span class="hint" id="title-hint">1–200 字</span>
-        </label>
+        <div class="field">
+          <label class="label" for="f-title">待辦標題 <em class="req">必填</em></label>
+          <div class="input-wrap" id="title-wrap">
+            <input id="f-title" type="text" maxlength="200" autocomplete="off" enterkeyhint="done" placeholder="想做啲咩？">
+            <button type="button" id="voice-btn" class="voice-btn" hidden aria-pressed="false" aria-label="用語音輸入標題" title="用語音輸入">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0"/><path d="M12 18v4M9 22h6"/></svg>
+            </button>
+          </div>
+          <div class="hint-row">
+            <span class="hint" id="title-hint">1–200 字</span>
+            <select id="voice-lang" class="voice-lang" hidden aria-label="語音語言">
+              <option value="zh-HK">粵語</option>
+              <option value="zh-CN">普通話</option>
+              <option value="en-US">English</option>
+            </select>
+          </div>
+        </div>
 
         <label class="field" for="f-due">
           <span class="label">到期日</span>

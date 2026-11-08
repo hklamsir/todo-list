@@ -1,6 +1,7 @@
 import { createApi } from './lib/api.js';
 import { formatDue, tagUnion, todayISO } from './lib/format.js';
 import { buildQuery, loadPrefs, savePrefs } from './lib/state.js';
+import { DEFAULT_LANG, VOICE_LANGS, createVoiceInput, getSpeechCtor, insertTranscript } from './lib/voice.js';
 
 const cfg = window.__APP_CONFIG__ ?? {};
 
@@ -44,6 +45,9 @@ const el = {
   editorError: $('editor-error'),
   back: $('editor-back'),
   fTitle: $('f-title'),
+  titleWrap: $('title-wrap'),
+  voiceBtn: $('voice-btn'),
+  voiceLang: $('voice-lang'),
   fDue: $('f-due'),
   fTag: $('f-tag'),
   tagChips: $('tag-chips'),
@@ -79,6 +83,39 @@ function safeStorage() {
   } catch {
     return null;
   }
+}
+
+/* ---------------- 語音輸入（ADR-007 / spec §3.7） ---------------- */
+
+const speechCtor = getSpeechCtor(window);
+let voiceBase = { value: '', start: 0, end: 0 };
+
+const voice = createVoiceInput({
+  ctor: speechCtor,
+  lang: DEFAULT_LANG,
+  onState: (next) => {
+    const listening = next === 'listening';
+    el.voiceBtn.classList.toggle('is-listening', listening);
+    el.voiceBtn.setAttribute('aria-pressed', String(listening));
+    el.voiceBtn.setAttribute('aria-label', listening ? '停止語音輸入' : '用語音輸入標題');
+    if (listening) el.titleHint.textContent = '錄音中… 再撳一下停止';
+    else updateTitleHint();
+  },
+  onInterim: (text) => applyVoiceText(text, false),
+  onFinal: (text) => applyVoiceText(text, true),
+  onError: (message) => showEditorError(message),
+});
+
+/** interim 只做預覽，final 才把游標推到插入點之後。 */
+function applyVoiceText(text, isFinal) {
+  if (!text) return;
+  const { value, caret } = insertTranscript(text, { ...voiceBase, maxLength: 200 });
+  el.fTitle.value = value;
+  if (!isFinal) return;
+
+  voiceBase = { value, start: caret, end: caret };
+  el.fTitle.focus();
+  el.fTitle.setSelectionRange(caret, caret);
 }
 
 /* ---------------- 視圖切換 ---------------- */
@@ -371,6 +408,7 @@ function startInlineEdit(li, todo) {
 /* ---------------- 編輯器 ---------------- */
 
 function openEditor(todo) {
+  voice.stop();
   state.editingId = todo ? todo.id : null;
   state.editTags = todo ? [...(todo.tags ?? [])] : [];
   el.editorTitle.textContent = todo ? '編輯待辦' : '新增待辦';
@@ -390,6 +428,7 @@ function openEditor(todo) {
 }
 
 function closeEditor() {
+  voice.stop();
   state.editingId = null;
   state.editTags = [];
   show('app');
@@ -438,6 +477,7 @@ function showEditorError(message) {
 }
 
 function updateTitleHint() {
+  if (voice.getState() === 'listening') return;
   const length = el.fTitle.value.trim().length;
   el.titleHint.textContent = length === 0 ? '1–200 字' : `${length} / 200 字`;
 }
@@ -580,6 +620,30 @@ function bindEvents() {
 
   el.fTitle.addEventListener('input', updateTitleHint);
   el.fDue.addEventListener('change', updateDueHint);
+
+  // 語音：冇 API（Firefox、iOS Chrome）就連掣都唔顯示，唔會出現 disabled 壞掣
+  if (speechCtor) {
+    el.voiceBtn.hidden = false;
+    el.voiceLang.hidden = false;
+    el.titleWrap.classList.add('has-voice');
+
+    el.voiceBtn.addEventListener('click', () => {
+      if (voice.getState() === 'listening') {
+        voice.stop();
+        return;
+      }
+      const start = el.fTitle.selectionStart ?? el.fTitle.value.length;
+      const end = el.fTitle.selectionEnd ?? start;
+      voiceBase = { value: el.fTitle.value, start, end };
+      showEditorError('');
+      const lang = VOICE_LANGS.includes(el.voiceLang.value) ? el.voiceLang.value : DEFAULT_LANG;
+      voice.start({ lang });
+    });
+
+    el.voiceLang.addEventListener('change', () => {
+      voice.setLang(el.voiceLang.value);
+    });
+  }
 
   el.dueClear.addEventListener('click', () => {
     el.fDue.value = '';
