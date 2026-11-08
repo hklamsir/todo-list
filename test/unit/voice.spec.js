@@ -4,6 +4,7 @@ import {
   VOICE_LANGS,
   createVoiceInput,
   getSpeechCtor,
+  hasAudioInput,
   insertTranscript,
   isMicrophoneAllowed,
   isSpeechSupported,
@@ -119,6 +120,12 @@ describe('mapVoiceError', () => {
     expect(neverAsked).not.toBe(denied);
   });
 
+  it('完全冇麥克風裝置時，講「未偵測到麥克風」而唔係講權限', () => {
+    const message = mapVoiceError('not-allowed', { permission: 'prompt', hasDevice: false });
+    expect(message).toContain('未偵測到麥克風');
+    expect(message).not.toContain('權限');
+  });
+
   it('聽唔到 / 無麥克風 / 無網絡', () => {
     expect(mapVoiceError('no-speech')).toContain('聽唔到');
     expect(mapVoiceError('audio-capture')).toContain('麥克風');
@@ -132,6 +139,22 @@ describe('mapVoiceError', () => {
   it('未知錯誤有通用文案', () => {
     expect(mapVoiceError('boom')).toContain('再試');
     expect(mapVoiceError(undefined)).toContain('再試');
+  });
+});
+
+describe('hasAudioInput', () => {
+  it('有收音裝置', () => {
+    expect(hasAudioInput([{ kind: 'audioinput' }, { kind: 'audiooutput' }])).toBe(true);
+  });
+
+  it('只有喇叭（桌面機冇麥克風）→ false', () => {
+    expect(hasAudioInput([{ kind: 'audiooutput' }])).toBe(false);
+  });
+
+  it('清單為空或冇 API → null，代表判斷唔到，唔應該因此隱藏掣', () => {
+    expect(hasAudioInput([])).toBeNull();
+    expect(hasAudioInput(undefined)).toBeNull();
+    expect(hasAudioInput(null)).toBeNull();
   });
 });
 

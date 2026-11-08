@@ -45,10 +45,23 @@ export function isMicrophoneAllowed(policy) {
 }
 
 /** 錯誤碼 → 中文提示；`aborted` 回 null（用戶自己取消，唔彈錯）。 */
-export function mapVoiceError(code, { permission } = {}) {
-  if (code === 'not-allowed' && permission === 'denied') return DENIED_MESSAGE;
+export function mapVoiceError(code, { permission, hasDevice } = {}) {
+  if (code === 'not-allowed') {
+    if (hasDevice === false) return '未偵測到麥克風：請接上麥克風或耳機，然後重新整理';
+    if (permission === 'denied') return DENIED_MESSAGE;
+    return ERROR_MESSAGES['not-allowed'];
+  }
   if (Object.prototype.hasOwnProperty.call(ERROR_MESSAGES, code)) return ERROR_MESSAGES[code];
   return '語音輸入失敗，請再試一次';
+}
+
+/**
+ * 由 enumerateDevices() 結果判斷有冇收音裝置。
+ * 回 null 代表「判斷唔到」（API 唔存在／清單為空），唔應該因此隱藏掣。
+ */
+export function hasAudioInput(devices) {
+  if (!Array.isArray(devices) || devices.length === 0) return null;
+  return devices.some((device) => device && device.kind === 'audioinput');
 }
 
 const clamp = (n, min, max) => Math.min(Math.max(n, min), max);

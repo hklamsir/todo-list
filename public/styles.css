@@ -670,6 +670,13 @@ input, select, button { font-family: inherit; }
 
 .voice-lang:hover { color: var(--ink); }
 
+.voice-note {
+  margin-top: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--warn);
+}
+
 .field input:focus {
   outline: none;
   border-color: var(--ink);

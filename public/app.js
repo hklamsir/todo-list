@@ -1,7 +1,7 @@
 import { createApi } from './lib/api.js';
 import { formatDue, tagUnion, todayISO } from './lib/format.js';
 import { buildQuery, loadPrefs, savePrefs } from './lib/state.js';
-import { DEFAULT_LANG, VOICE_LANGS, createVoiceInput, getSpeechCtor, insertTranscript, isMicrophoneAllowed, mapVoiceError } from './lib/voice.js';
+import { DEFAULT_LANG, VOICE_LANGS, createVoiceInput, getSpeechCtor, hasAudioInput, insertTranscript, isMicrophoneAllowed, mapVoiceError } from './lib/voice.js';
 
 const cfg = window.__APP_CONFIG__ ?? {};
 
@@ -48,6 +48,7 @@ const el = {
   titleWrap: $('title-wrap'),
   voiceBtn: $('voice-btn'),
   voiceLang: $('voice-lang'),
+  voiceNote: $('voice-note'),
   fDue: $('f-due'),
   fTag: $('f-tag'),
   tagChips: $('tag-chips'),
@@ -91,16 +92,37 @@ const speechCtor = getSpeechCtor(window);
 const micPolicy = document.permissionsPolicy || document.featurePolicy;
 const micAllowed = isMicrophoneAllowed(micPolicy);
 let micPermission = null;
+let micDevice = null;
 let voiceBase = { value: '', start: 0, end: 0 };
 
-/** 記住麥克風權限狀態，令撳掣嗰刻唔需要 await（保留 user gesture）。 */
-async function refreshMicPermission() {
+/** 記住權限狀態同有冇收音裝置，令撳掣嗰刻唔需要 await（保留 user gesture）。 */
+async function refreshMicState() {
   try {
     const status = await navigator.permissions?.query({ name: 'microphone' });
     micPermission = status?.state ?? null;
   } catch {
     micPermission = null;
   }
+
+  try {
+    const devices = await navigator.mediaDevices?.enumerateDevices?.();
+    micDevice = hasAudioInput(devices);
+  } catch {
+    micDevice = null;
+  }
+}
+
+/**
+ * 三個條件齊才出掣：有 API、政策允許、偵測到收音裝置。
+ * 政策封鎖就靜靜隱藏；冇裝置就顯示「未偵測到麥克風」，唔會出一個撳完必定失敗嘅掣。
+ */
+function renderVoiceAvailability() {
+  if (!speechCtor) return;
+  const show = micAllowed && micDevice !== false;
+  el.voiceBtn.hidden = !show;
+  el.voiceLang.hidden = !show;
+  el.voiceNote.hidden = show || !micAllowed;
+  el.titleWrap.classList.toggle('has-voice', show);
 }
 
 const voice = createVoiceInput({
@@ -121,9 +143,10 @@ const voice = createVoiceInput({
       showEditorError(message);
       return;
     }
-    // 分清「用戶封鎖」同「請求根本冇送到瀏覽器」，提示才有用
-    refreshMicPermission().then((permission) => {
-      showEditorError(mapVoiceError(code, { permission }));
+    // 分清「冇裝置」「用戶封鎖」「請求冇送到瀏覽器」，提示才有用
+    refreshMicState().then(() => {
+      showEditorError(mapVoiceError(code, { permission: micPermission, hasDevice: micDevice }));
+      renderVoiceAvailability();
     });
   },
 });
@@ -431,7 +454,7 @@ function startInlineEdit(li, todo) {
 
 function openEditor(todo) {
   voice.stop();
-  refreshMicPermission();
+  refreshMicState().then(renderVoiceAvailability);
   state.editingId = todo ? todo.id : null;
   state.editTags = todo ? [...(todo.tags ?? [])] : [];
   el.editorTitle.textContent = todo ? '編輯待辦' : '新增待辦';
@@ -644,15 +667,17 @@ function bindEvents() {
   el.fTitle.addEventListener('input', updateTitleHint);
   el.fDue.addEventListener('change', updateDueHint);
 
-  // 語音：冇 API 或 Permissions-Policy 封鎖 microphone，都唔顯示掣（唔可以有壞掣）
-  if (speechCtor && micAllowed) {
-    el.voiceBtn.hidden = false;
-    el.voiceLang.hidden = false;
-    el.titleWrap.classList.add('has-voice');
+  // 語音：冇 API / 政策封鎖 / 冇麥克風裝置，都唔會出一個撳完必定失敗嘅掣
+  if (speechCtor) {
+    if (!micAllowed) console.warn('[voice] Permissions-Policy 封鎖了 microphone，麥克風按鈕已隱藏');
 
     el.voiceBtn.addEventListener('click', () => {
       if (voice.getState() === 'listening') {
         voice.stop();
+        return;
+      }
+      if (micDevice === false) {
+        showEditorError('未偵測到麥克風：請接上麥克風或耳機，然後重新整理');
         return;
       }
       if (micPermission === 'denied') {
@@ -670,8 +695,14 @@ function bindEvents() {
     el.voiceLang.addEventListener('change', () => {
       voice.setLang(el.voiceLang.value);
     });
-  } else if (speechCtor && !micAllowed) {
-    console.warn('[voice] Permissions-Policy 封鎖了 microphone，麥克風按鈕已隱藏');
+
+    // 插／拔麥克風後自動重新判斷，唔使重新載入頁面
+    navigator.mediaDevices?.addEventListener?.('devicechange', () => {
+      refreshMicState().then(renderVoiceAvailability);
+    });
+
+    renderVoiceAvailability();
+    refreshMicState().then(renderVoiceAvailability);
   }
 
   el.dueClear.addEventListener('click', () => {
