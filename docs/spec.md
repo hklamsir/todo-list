@@ -60,7 +60,7 @@
 
 **3.7 語音輸入（v1.1）** — 主要操作頁嘅「待辦標題」可以選擇用語音輸入（ADR-007）：
 
-- 只喺瀏覽器提供 `SpeechRecognition` / `webkitSpeechRecognition` 時顯示麥克風掣；唔支援就唔顯示，鍵盤照常可用，**唔會出現 disabled 壞掣**。
+- 只喺瀏覽器提供 `SpeechRecognition` / `webkitSpeechRecognition` **而且** `Permissions-Policy` 允許 microphone 時顯示麥克風掣；任何一項唔滿足就唔顯示，鍵盤照常可用，**唔會出現 disabled 壞掣**。
 - 撳一下開始、再撳一下停止；`continuous=false`、`interimResults=true`，`lang` 預設 `zh-HK`，可切 `zh-CN` / `en-US`。
 - 轉寫結果**插入游標位置**、保留原有文字、超過 200 字即截斷；草稿即時顯示，但**唔會自動儲存**，要用戶自己按「儲存」。
 - 錯誤（權限被拒／聽唔到／無網絡／無麥克風）一律轉成中文提示，表單唔會中斷。

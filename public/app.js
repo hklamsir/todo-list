@@ -1,7 +1,7 @@
 import { createApi } from './lib/api.js';
 import { formatDue, tagUnion, todayISO } from './lib/format.js';
 import { buildQuery, loadPrefs, savePrefs } from './lib/state.js';
-import { DEFAULT_LANG, VOICE_LANGS, createVoiceInput, getSpeechCtor, insertTranscript } from './lib/voice.js';
+import { DEFAULT_LANG, VOICE_LANGS, createVoiceInput, getSpeechCtor, insertTranscript, isMicrophoneAllowed, mapVoiceError } from './lib/voice.js';
 
 const cfg = window.__APP_CONFIG__ ?? {};
 
@@ -88,7 +88,20 @@ function safeStorage() {
 /* ---------------- 語音輸入（ADR-007 / spec §3.7） ---------------- */
 
 const speechCtor = getSpeechCtor(window);
+const micPolicy = document.permissionsPolicy || document.featurePolicy;
+const micAllowed = isMicrophoneAllowed(micPolicy);
+let micPermission = null;
 let voiceBase = { value: '', start: 0, end: 0 };
+
+/** 記住麥克風權限狀態，令撳掣嗰刻唔需要 await（保留 user gesture）。 */
+async function refreshMicPermission() {
+  try {
+    const status = await navigator.permissions?.query({ name: 'microphone' });
+    micPermission = status?.state ?? null;
+  } catch {
+    micPermission = null;
+  }
+}
 
 const voice = createVoiceInput({
   ctor: speechCtor,
@@ -103,7 +116,16 @@ const voice = createVoiceInput({
   },
   onInterim: (text) => applyVoiceText(text, false),
   onFinal: (text) => applyVoiceText(text, true),
-  onError: (message) => showEditorError(message),
+  onError: (message, code) => {
+    if (code !== 'not-allowed') {
+      showEditorError(message);
+      return;
+    }
+    // 分清「用戶封鎖」同「請求根本冇送到瀏覽器」，提示才有用
+    refreshMicPermission().then((permission) => {
+      showEditorError(mapVoiceError(code, { permission }));
+    });
+  },
 });
 
 /** interim 只做預覽，final 才把游標推到插入點之後。 */
@@ -409,6 +431,7 @@ function startInlineEdit(li, todo) {
 
 function openEditor(todo) {
   voice.stop();
+  refreshMicPermission();
   state.editingId = todo ? todo.id : null;
   state.editTags = todo ? [...(todo.tags ?? [])] : [];
   el.editorTitle.textContent = todo ? '編輯待辦' : '新增待辦';
@@ -621,8 +644,8 @@ function bindEvents() {
   el.fTitle.addEventListener('input', updateTitleHint);
   el.fDue.addEventListener('change', updateDueHint);
 
-  // 語音：冇 API（Firefox、iOS Chrome）就連掣都唔顯示，唔會出現 disabled 壞掣
-  if (speechCtor) {
+  // 語音：冇 API 或 Permissions-Policy 封鎖 microphone，都唔顯示掣（唔可以有壞掣）
+  if (speechCtor && micAllowed) {
     el.voiceBtn.hidden = false;
     el.voiceLang.hidden = false;
     el.titleWrap.classList.add('has-voice');
@@ -630,6 +653,10 @@ function bindEvents() {
     el.voiceBtn.addEventListener('click', () => {
       if (voice.getState() === 'listening') {
         voice.stop();
+        return;
+      }
+      if (micPermission === 'denied') {
+        showEditorError(mapVoiceError('not-allowed', { permission: 'denied' }));
         return;
       }
       const start = el.fTitle.selectionStart ?? el.fTitle.value.length;
@@ -643,6 +670,8 @@ function bindEvents() {
     el.voiceLang.addEventListener('change', () => {
       voice.setLang(el.voiceLang.value);
     });
+  } else if (speechCtor && !micAllowed) {
+    console.warn('[voice] Permissions-Policy 封鎖了 microphone，麥克風按鈕已隱藏');
   }
 
   el.dueClear.addEventListener('click', () => {

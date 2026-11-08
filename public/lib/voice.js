@@ -11,13 +11,15 @@ export const TITLE_MAX = 200;
 const ALNUM = /[A-Za-z0-9]/;
 
 const ERROR_MESSAGES = Object.freeze({
-  'not-allowed': '已拒絕麥克風權限，請喺瀏覽器設定開啟',
-  'service-not-allowed': '已拒絕麥克風權限，請喺瀏覽器設定開啟',
+  'not-allowed': '麥克風權限未開啟：瀏覽器未收到請求，請重新整理再試',
+  'service-not-allowed': '瀏覽器嘅語音辨識服務被停用（可能係管理政策或網絡封鎖）',
   'no-speech': '聽唔到聲音，再試一次',
   'audio-capture': '搵唔到麥克風，請檢查裝置',
   network: '語音辨識需要連線，請檢查網絡',
   aborted: null,
 });
+
+const DENIED_MESSAGE = '麥克風權限已被封鎖：撳網址列左邊圖示 → 麥克風 → 允許，然後重新整理';
 
 export function getSpeechCtor(scope = globalThis) {
   if (!scope) return null;
@@ -29,8 +31,22 @@ export function isSpeechSupported(scope = globalThis) {
   return getSpeechCtor(scope) !== null;
 }
 
+/**
+ * Permissions-Policy 有冇封鎖 microphone。
+ * 封鎖時連掣都唔應該出現（ADR-007：唔可以有壞掣）；冇 API 嘅舊瀏覽器一律當允許。
+ */
+export function isMicrophoneAllowed(policy) {
+  if (!policy || typeof policy.allowsFeature !== 'function') return true;
+  try {
+    return policy.allowsFeature('microphone');
+  } catch {
+    return true;
+  }
+}
+
 /** 錯誤碼 → 中文提示；`aborted` 回 null（用戶自己取消，唔彈錯）。 */
-export function mapVoiceError(code) {
+export function mapVoiceError(code, { permission } = {}) {
+  if (code === 'not-allowed' && permission === 'denied') return DENIED_MESSAGE;
   if (Object.prototype.hasOwnProperty.call(ERROR_MESSAGES, code)) return ERROR_MESSAGES[code];
   return '語音輸入失敗，請再試一次';
 }
@@ -132,9 +148,10 @@ export function createVoiceInput({ ctor, lang = DEFAULT_LANG, onState, onInterim
     };
 
     instance.onerror = (event) => {
-      const message = mapVoiceError(event?.error);
+      const code = event?.error;
+      const message = mapVoiceError(code);
       setState('idle');
-      if (message) onError?.(message);
+      if (message) onError?.(message, code);
     };
 
     instance.onend = () => {

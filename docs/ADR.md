@@ -145,6 +145,7 @@
 - **Rationale:** 零成本、零後端、零 build 影響；音頻由瀏覽器廠商處理，Worker 唔會接觸音頻，隱私邊界最清楚；不自動儲存令辨識錯誤永遠有得改。相對 Cloud STT，v1.1 用唔著為準確度付後端複雜度——粵語短句 + 用戶自己校對，已經夠用。
 - **Consequences / 後人注意:**
   - **不變量**：語音純屬輸入輔助，鍵盤永遠可用；冇 API 就唔顯示掣，**唔可以**出現 disabled 嘅壞掣。`voice.js` 唔可以 import DOM，否則測唔到。
+  - 顯示條件有兩個：有 `SpeechRecognition` **且** `document.featurePolicy.allowsFeature('microphone')` 為 true。後者為 false 通常代表 `Permissions-Policy` 送錯（例如仍係 `microphone=()`），癥狀係 Chrome 站點設定仲顯示「詢問（預設）」但一撳就 `not-allowed`——即請求根本冇送到權限層。呢種情況而家會直接隱藏掣並 `console.warn`，唔會再出現「有掣但永遠失敗」。
   - Chrome 嘅 `continuous` 有已知缺陷：靜音 5–10 秒或連續約 30 秒會自動 `onend`。本設計係單句模式，斷線即回 idle，**唔做自動重連**（避免無限重試燒網絡同電）。
   - `zh-HK` 出書面語，而且中英夾雜（`EC`、`ADR`、`Supabase`、`PS Training`）幾乎必錯；呢個係「唔自動儲存」嘅第二個理由，唔好改。
   - 改 `Permissions-Policy` 只放寬 microphone，**唔好**順手開 camera / geolocation。

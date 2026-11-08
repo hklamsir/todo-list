@@ -5,6 +5,7 @@ import {
   createVoiceInput,
   getSpeechCtor,
   insertTranscript,
+  isMicrophoneAllowed,
   isSpeechSupported,
   mapVoiceError,
 } from '../../public/lib/voice.js';
@@ -105,7 +106,17 @@ describe('insertTranscript', () => {
 describe('mapVoiceError', () => {
   it('權限被拒', () => {
     expect(mapVoiceError('not-allowed')).toContain('權限');
-    expect(mapVoiceError('service-not-allowed')).toContain('權限');
+    expect(mapVoiceError('service-not-allowed')).toContain('服務');
+  });
+
+  it('分得清「用戶封鎖」同「請求冇送到瀏覽器」', () => {
+    const denied = mapVoiceError('not-allowed', { permission: 'denied' });
+    expect(denied).toContain('封鎖');
+    expect(denied).toContain('網址列');
+
+    const neverAsked = mapVoiceError('not-allowed', { permission: 'prompt' });
+    expect(neverAsked).toContain('重新整理');
+    expect(neverAsked).not.toBe(denied);
   });
 
   it('聽唔到 / 無麥克風 / 無網絡', () => {
@@ -121,6 +132,28 @@ describe('mapVoiceError', () => {
   it('未知錯誤有通用文案', () => {
     expect(mapVoiceError('boom')).toContain('再試');
     expect(mapVoiceError(undefined)).toContain('再試');
+  });
+});
+
+describe('isMicrophoneAllowed', () => {
+  it('政策允許先顯示麥克風掣', () => {
+    expect(isMicrophoneAllowed({ allowsFeature: () => true })).toBe(true);
+  });
+
+  it('Permissions-Policy 封鎖時回 false（唔可以出壞掣）', () => {
+    expect(isMicrophoneAllowed({ allowsFeature: () => false })).toBe(false);
+  });
+
+  it('冇 featurePolicy API 或行錯，一律當允許，唔會誤擋', () => {
+    expect(isMicrophoneAllowed(undefined)).toBe(true);
+    expect(isMicrophoneAllowed({})).toBe(true);
+    expect(
+      isMicrophoneAllowed({
+        allowsFeature() {
+          throw new Error('unsupported');
+        },
+      }),
+    ).toBe(true);
   });
 });
 
@@ -201,11 +234,11 @@ describe('createVoiceInput', () => {
     expect(onFinal).not.toHaveBeenCalled();
   });
 
-  it('錯誤會映射成中文並回 idle', () => {
+  it('錯誤會映射成中文並回 idle，同時帶回原始錯誤碼', () => {
     const { Ctor, voice, onError, onState } = build();
     voice.start();
     Ctor.last.onerror?.({ error: 'not-allowed' });
-    expect(onError).toHaveBeenCalledWith(expect.stringContaining('權限'));
+    expect(onError).toHaveBeenCalledWith(expect.stringContaining('權限'), 'not-allowed');
     expect(onState).toHaveBeenCalledWith('idle');
   });
 
