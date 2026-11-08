@@ -2,6 +2,8 @@
 
 個人待辦清單。一個畫面、一張表、一次 deploy。設計依據 `docs/spec.md` v1.1，視覺用 `todo-theme-proposals.html` 的**方案 F（Split Hybrid）**。
 
+**Production**：https://todo.lamsir.workers.dev
+
 ## 架構一覽
 
 | 層 | 實作 |
